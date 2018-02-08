@@ -22,7 +22,7 @@ class ChatRoom {
     return this.usernameInput.value.trim();
   }
 
-  addUser(e, _this) {
+  addUser(e) {
     if (e.which === 13) {
       const username = this.retrieveUsername();
 
@@ -40,14 +40,28 @@ class ChatRoom {
   }
 
   addChatMessage(username, message) {
-    
+    const usernameSpan = document.createElement('span').classList.add('username');
+    const messageBody = document.createElement('span').classList.add('message-body');
+    const messageEl = document.createElement('li').classList.add('message');
+
+    usernameSpan.innerText = username;
+    messageBody.innerText = message;
+
+    messageEl.appendChild(usernameSpan);
+    messageEl.appendChild(messageBody);
+
+    this.addMessage(messageEl);
   }
 
   addLogMessage(message) {
     let logEl = document.createElement(li).classList.add('log');
     logEl.innerText = message;
 
-    this.messages.appendChild(logEl);
+    this.addMessage(logEl);
+  }
+
+  addMessage(element) {
+    this.messages.appendChild(element);
   }
 
   attachSocketEvents() {
