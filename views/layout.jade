@@ -1,3 +1,5 @@
+include ./_mixin
+
 doctype html
 html
   head
@@ -5,3 +7,7 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
     block content
+    script(src='/node_modules/socket.io-client/dist/socket.io.js')
+    +javascript_script_tag('chatroom')
+    script.
+      new ChatRoom();

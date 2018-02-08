@@ -1,5 +1,17 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  ul.pages
+    li.login
+      .form
+        h3.title What's your nickname?
+        input.username-input(type="text" maxlength="14" autofocus)
+    li.chat.hide
+      .chat-area
+        ul.messages
+        form.message-form(action="")
+          input.message-input(type="text" autocomplete="off")
+          button.send-button Send
+        
+    
+  

@@ -30,6 +30,10 @@ a {
   width: 100%;
 }
 
+.hide {
+  display: none;
+}
+
 /************
   Pages
 ************/
@@ -70,19 +74,9 @@ a {
   font-weight: 100;
 }
 
-
-
 /************
   Chat Page
 ************/
-
-.chat {
-  display: none;
-}
-
-.chat.page {
-  display: none;
-}
 
 .message-form {
   background: #000;
