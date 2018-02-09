@@ -1,4 +1,6 @@
-const ChatApp = require('../modules/chatapp');
+const ChatApp = require('../../modules/chatapp');
+const WaitList = require('../../modules/waitlist');
+const User = require('../../modules/user');
 
 describe('ChatApp', () => {
   describe('initialization', () => {
@@ -15,11 +17,11 @@ describe('ChatApp', () => {
       expect(chat.io).toBe(io);
     });
 
-    it('assigns this.io to io object passed in', () => {
+    it('assigns this.waitlist to new instance of WaitList', () => {
       let io = {};
       let chat = new ChatApp(io);
 
-      expect(chat.numUsers).toBe(0);
+      expect(chat.waitlist instanceof WaitList).toBe(true);
     });
   });
 
@@ -48,4 +50,18 @@ describe('ChatApp', () => {
       expect(io.on).toHaveBeenCalled();
     });
   });
+
+  // describe('findPair', () => {
+  //   beforeEach(() => {
+  //     let io = {
+  //       on: () => {}
+  //     }
+  //     let chat = new ChatApp(io);
+  //     let user1 = {
+  //
+  //     };
+  //   });
+  //
+  //   it("calls findComplement")
+  // });
 });

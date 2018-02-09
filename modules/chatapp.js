@@ -1,8 +1,10 @@
+const WaitList = require('./waitlist');
+const User = require('./user');
+
 class ChatApp {
   constructor(io) {
-    this.waitingList = [];
+    this.waitlist = new WaitList();
     this.io = io;
-    this.addedUser = false;
   }
 
   init() {
@@ -12,141 +14,115 @@ class ChatApp {
   // bind Socket.IO events to io connection
   attachIOEvents() {
     this.io.on('connection', (socket) => {
-      socket.addedUser = false;
-      socket.exceptions = new Set();
+      let user = new User(socket);
 
-      socket.on('add user', this.addUser(socket));
-      socket.on('disconnect', this.dropUser(socket));
-      socket.on('new message', this.addMessage(socket));
-      socket.on('typing', this.addTyping(socket));
-      socket.on('stop typing', this.stopTyping(socket));
-      socket.on('hop', this.handleHop(socket));
-      socket.on('find new pair', this.findNewPairFor(socket));
+      socket.on('add user', this.addUser(user));
+      socket.on('disconnect', this.dropUser(user));
+      socket.on('new message', this.addMessage(user));
+      socket.on('typing', this.addTyping(user));
+      socket.on('stop typing', this.stopTyping(user));
+      socket.on('hop', this.handleHop(user));
+      socket.on('find new pair', this.findNewPairFor(user));
     });
   }
 
-  handleHop(socket) {
+  handleHop(user) {
     return () => {
-      if (!socket.pairId) return;
-      let pairId = socket.pairId;
+      if (!user.pairId) return;
+      let pairId = user.pairId;
 
-      socket.exceptions.add(pairId);
-      socket.pairId = null;
-      this.findPair(socket);
+      user.addException(pairId);
+      user.pairId = null;
+      this.findPair(user);
 
-      socket.to(pairId).emit('user left', {
-        username: socket.username
+      user.broadcast('user left', {
+        username: user.username
       });
     }
   }
 
-  findNewPairFor(socket) {
+  findNewPairFor(user) {
     return () => {
-      socket.pairId = null;
-      this.findPair(socket);
+      user.pairId = null;
+      this.findPair(user);
     }
   }
 
-  addTyping(socket) {
+  addTyping(user) {
     return () => {
-      if (!socket.pairId) return;
+      if (!user.pairId) return;
 
-      socket.to(socket.pairId).emit('typing', {
-        username: socket.username
+      user.broadcast('typing', {
+        username: user.username
       });
     }
   }
 
-  stopTyping(socket) {
+  stopTyping(user) {
     return () => {
-      if (!socket.pairId) return;
+      if (!user.pairId) return;
 
-      socket.to(socket.pairId).emit('stop typing', {
-        username: socket.username
+      user.broadcast('stop typing', {
+        username: user.username
       });
     }
   }
 
-  addMessage(socket) {
+  addMessage(user) {
     return (message) => {
-      if (!socket.pairId) return;
+      if (!user.pairId) return;
       // send message to pair
-      socket.to(socket.pairId).emit('new message', {
-        username: socket.username,
+      user.broadcast('new message', {
+        username: user.username,
         message: message
       });
     }
   }
 
-  addUser(socket) {
+  addUser(user) {
     return (username) => {
-      if (socket.addedUser) return;
-
-      // we store the username in the socket session for this client
-      socket.username = username;
-      socket.addedUser = true;
-      socket.emit('login');
-      this.findPair(socket);
+      if (user.added) return;
+      // we store the username in the user session for this client
+      user.username = username;
+      user.added = true;
+      user.emit('login');
+      this.findPair(user);
     }
   }
 
   findPair(user) {
-    let complement = this.findComplement(user);
+    let complement = this.waitlist.findComplement(user);
 
     if (complement) {
-      this.removeFromWaiting(complement);
+      this.waitlist.remove(complement);
       this.createPair(user, complement);
     } else {
-      this.waitingList.push(user);
+      this.waitlist.add(user);
       user.emit('waiting');
     }
-  }
-
-  removeFromWaiting(user) {
-    let idx = this.waitingList.indexOf(user);
-    this.waitingList.splice(idx, 1);
-  }
-
-  findComplement(user) {
-    for (let i = 0; i < this.waitingList.length; i++) {
-      let complement = this.waitingList[i];
-      if (this.canConnect(user, complement)) {
-        return complement;
-      }
-    }
-
-    return null;
-  }
-
-  canConnect(userOne, userTwo) {
-    return !userOne.exceptions.has(userTwo.id) &&
-           !userTwo.exceptions.has(userOne.id);
   }
 
   createPair(userOne, userTwo) {
     userOne.pairId = userTwo.id;
     userTwo.pairId = userOne.id;
 
-    userOne.to(userOne.pairId).emit('user joined', {
+    userOne.broadcast('user joined', {
       username: userOne.username,
       pairId: userOne.id
     });
 
-    userTwo.to(userTwo.pairId).emit('user joined', {
+    userTwo.broadcast('user joined', {
       username: userTwo.username,
       pairId: userTwo.id
     });
   }
 
-  removePair(user) {
-    this.pairs = this.pairs.sele
-  }
-
-  dropUser(socket) {
+  dropUser(user) {
     return () => {
-      if (socket.addedUser && socket.pairId) {
-        socket.to(socket.pairId).emit('user left', {
-          username: socket.username
+      this.waitlist.remove(user);
+      if (user.added && user.pairId) {
+        user.broadcast('user left', {
+          username: user.username
         });
       }
     }
