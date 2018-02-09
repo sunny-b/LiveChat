@@ -9,6 +9,7 @@ class ChatApp {
   init() {
     this.attachIOEvents();
   }
+  
   // bind Socket.IO events to io connection
   attachIOEvents() {
     this.io.on('connection', (socket) => {
@@ -18,37 +19,51 @@ class ChatApp {
       socket.on('add user', this.addUser(socket));
       socket.on('disconnect', this.dropUser(socket));
       socket.on('new message', this.addMessage(socket));
+      socket.on('typing', this.addTyping(socket));
+      socket.on('stop typing', this.stopTyping(socket));
     });
   }
 
-  addMessage(socket) {
-    let localSocket = socket;
+  addTyping(socket) {
+    return () => {
+      if (!socket.pairId) return;
 
-    return (message, pairId) => {
-      // we tell the client to execute 'new message'
-      localSocket.to(pairId).emit('new message', {
-        username: localSocket.username,
+      socket.to(socket.pairId).emit('typing', {
+        username: socket.username
+      });
+    }
+  }
+
+  stopTyping(socket) {
+    return () => {
+      if (!socket.pairId) return;
+
+      socket.to(socket.pairId).emit('stop typing', {
+        username: socket.username
+      });
+    }
+  }
+
+  addMessage(socket) {
+    return (message) => {
+      if (!socket.pairId) return;
+      // send message to pair
+      socket.to(socket.pairId).emit('new message', {
+        username: socket.username,
         message: message
       });
     }
   }
 
   addUser(socket) {
-    let localSocket = socket;
-
     return (username) => {
-      if (localSocket.addedUser) return;
+      if (socket.addedUser) return;
 
       // we store the username in the socket session for this client
-      localSocket.username = username;
-      localSocket.addedUser = true;
-      localSocket.emit('login');
-      this.findPair(localSocket);
-
-      // echo globally (all clients) that a person has connected
-      // localSocket.broadcast.emit('user joined', {
-      //   username: localSocket.username
-      // });
+      socket.username = username;
+      socket.addedUser = true;
+      socket.emit('login');
+      this.findPair(socket);
     }
   }
 
@@ -88,26 +103,32 @@ class ChatApp {
     const pair = [userOne, userTwo];
     this.pairs.push(pair);
 
-    userOne.to(userTwo.id).emit('user joined', {
+    userOne.pairId = userTwo.id;
+    userTwo.pairId = userOne.id;
+
+    userOne.to(userOne.pairId).emit('user joined', {
       username: userOne.username,
       pairId: userOne.id
     });
 
-    userTwo.to(userOne.id).emit('user joined', {
+    userTwo.to(userTwo.pairId).emit('user joined', {
       username: userTwo.username,
       pairId: userTwo.id
     });
   }
 
-  dropUser(socket) {
-    let localSocket = socket;
+  removePair(user) {
 
+  }
+
+  dropUser(socket) {
     return () => {
-      if (localSocket.addedUser) {
-        // echo globally that this client has left
-        localSocket.broadcast.emit('user left', {
-          username: localSocket.username
+      if (socket.addedUser && socket.pairId) {
+        socket.to(socket.pairId).emit('user left', {
+          username: socket.username
         });
+
+        this.removePair(socket);
       }
     }
   }

@@ -7,6 +7,10 @@ class ChatRoom {
     this.messageInput = document.querySelector('.message-input');
     this.messageForm = document.querySelector('.message-form');
     this.sendButton = document.querySelector('.send-button');
+
+    this.TYPING_TIMER_LENGTH = 400; //ms
+    this.connected = false;
+    this.typing = false;
     this.socket = io();
 
     this.attachBrowserEvents();
@@ -43,7 +47,27 @@ class ChatRoom {
   attachBrowserEvents() {
     this.usernameInput.addEventListener('keydown', this.addUser.bind(this));
     this.messageInput.addEventListener('keyup', this.toggleInput.bind(this));
+    this.messageInput.addEventListener('keydown', this.updateTyping.bind(this));
     this.messageForm.addEventListener('submit', this.sendMessage.bind(this));
+  }
+
+  updateTyping(e) {
+    if (this.connected) {
+      if (!this.typing) {
+        this.typing = true;
+        this.socket.emit('typing');
+      }
+      this.lastTypingTime = (new Date()).getTime();
+
+      setTimeout(() => {
+        const typingTimer = (new Date()).getTime();
+        const timeDiff = typingTimer - this.lastTypingTime;
+        if (timeDiff >= this.TYPING_TIMER_LENGTH && this.typing) {
+          this.socket.emit('stop typing');
+          this.typing = false;
+        }
+      }, this.TYPING_TIMER_LENGTH);
+    }
   }
 
   toggleInput(e) {
@@ -61,25 +85,45 @@ class ChatRoom {
     const message = this.retrieveMessage();
 
     if (message) {
+      this.typing = false;
+      this.lastTypingTime = (new Date()).getTime();
       this.messageInput.value = "";
       this.sendButton.disabled = true;
-      this.addChatMessage(message, this.username, true)
-      this.socket.emit('new message', message, this.socket.pairId);
+      this.addChatMessage({
+        message: message,
+        username: this.username,
+        isSameUser: true
+      });
+      this.socket.emit('stop typing');
+      this.socket.emit('new message', message);
     }
   }
 
-  addChatMessage(message, username, isSameUser = false) {
+  addTypingMessage(data) {
+    data.message = 'is typing...'
+    data.typing = true;
+
+    this.addChatMessage(data);
+  }
+
+  removeTypingMessage() {
+    const typingEl = document.querySelector('.message.typing');
+    if (typingEl) typingEl.parentNode.removeChild(typingEl);
+  }
+
+  addChatMessage(data) {
     const usernameSpan = document.createElement('span');
     const messageBody = document.createElement('span')
     const messageEl = document.createElement('li');
 
-    if (isSameUser) usernameSpan.classList.add('same');
+    if (data.isSameUser) usernameSpan.classList.add('same');
     usernameSpan.classList.add('username');
-    usernameSpan.innerText = username;
+    usernameSpan.innerText = data.username;
 
     messageBody.classList.add('message-body');
-    messageBody.innerText = message;
+    messageBody.innerText = data.message;
 
+    if (data.typing) messageEl.classList.add('typing');
     messageEl.classList.add('message');
     messageEl.appendChild(usernameSpan);
     messageEl.appendChild(messageBody);
@@ -97,6 +141,7 @@ class ChatRoom {
 
   addMessage(element) {
     this.messages.appendChild(element);
+    this.messages.scrollTop = this.messages.scrollHeight;
   }
 
   attachSocketEvents() {
@@ -113,38 +158,46 @@ class ChatRoom {
 
     // Whenever the server emits 'new message', update the chat body
     this.socket.on('new message', (data) => {
-      this.addChatMessage(data.message, data.username);
+      this.addChatMessage(data);
     });
 
     // Whenever the server emits 'user joined', log it in the chat body
     this.socket.on('user joined', (data) => {
-      this.socket.pairId = data.pairId;
+      this.connected = true;
       this.addLogMessage(`You have been connected to ${data.username}.`);
     });
 
     // Whenever the server `emit`s 'user left', log it in the chat body
     this.socket.on('user left', (data) => {
-      this.addLogMessage(`${data.username} has left.`);
+      this.connected = false;
+      const disconnectMessages = [
+        `${data.username} has left.`,
+        'You will be connected to the next available user.'
+      ];
+
+      disconnectMessages.forEach(message => this.addLogMessage(message));
     });
 
     // Whenever the server emits 'typing', show the typing message
-    // socket.on('typing', function (data) {
-    //   addChatTyping(data);
-    // });
+    this.socket.on('typing', (data) => {
+      this.addTypingMessage(data);
+    });
 
     // Whenever the server emits 'stop typing', kill the typing message
-    // socket.on('stop typing', function (data) {
-    //   removeChatTyping(data);
-    // });
+    this.socket.on('stop typing', (data) => {
+      this.removeTypingMessage(data);
+    });
 
     this.socket.on('disconnect', () => {
+      this.connected = false;
       this.addLogMessage('you have been disconnected');
     });
 
     this.socket.on('reconnect', () => {
       this.addLogMessage('you have been reconnected');
       if (this.username) {
-        this.socket.emit('add user', username);
+        this.connected = false;
+        this.socket.emit('add user', this.username);
       }
     });
 

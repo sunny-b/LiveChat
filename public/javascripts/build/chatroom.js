@@ -15,6 +15,10 @@ var ChatRoom = function () {
     this.messageInput = document.querySelector('.message-input');
     this.messageForm = document.querySelector('.message-form');
     this.sendButton = document.querySelector('.send-button');
+
+    this.TYPING_TIMER_LENGTH = 400; //ms
+    this.connected = false;
+    this.typing = false;
     this.socket = io();
 
     this.attachBrowserEvents();
@@ -43,12 +47,12 @@ var ChatRoom = function () {
     key: 'addUser',
     value: function addUser(e) {
       if (e.which === 13) {
-        var _username = this.retrieveUsername();
+        var username = this.retrieveUsername();
 
-        if (_username) {
-          this.username = _username;
+        if (username) {
+          this.username = username;
           this.displayChat();
-          this.socket.emit('add user', _username);
+          this.socket.emit('add user', username);
         }
       }
     }
@@ -57,7 +61,30 @@ var ChatRoom = function () {
     value: function attachBrowserEvents() {
       this.usernameInput.addEventListener('keydown', this.addUser.bind(this));
       this.messageInput.addEventListener('keyup', this.toggleInput.bind(this));
+      this.messageInput.addEventListener('keydown', this.updateTyping.bind(this));
       this.messageForm.addEventListener('submit', this.sendMessage.bind(this));
+    }
+  }, {
+    key: 'updateTyping',
+    value: function updateTyping(e) {
+      var _this = this;
+
+      if (this.connected) {
+        if (!this.typing) {
+          this.typing = true;
+          this.socket.emit('typing');
+        }
+        this.lastTypingTime = new Date().getTime();
+
+        setTimeout(function () {
+          var typingTimer = new Date().getTime();
+          var timeDiff = typingTimer - _this.lastTypingTime;
+          if (timeDiff >= _this.TYPING_TIMER_LENGTH && _this.typing) {
+            _this.socket.emit('stop typing');
+            _this.typing = false;
+          }
+        }, this.TYPING_TIMER_LENGTH);
+      }
     }
   }, {
     key: 'toggleInput',
@@ -77,28 +104,48 @@ var ChatRoom = function () {
       var message = this.retrieveMessage();
 
       if (message) {
+        this.typing = false;
+        this.lastTypingTime = new Date().getTime();
         this.messageInput.value = "";
         this.sendButton.disabled = true;
-        this.addChatMessage(message, this.username, true);
-        this.socket.emit('new message', message, this.socket.pairId);
+        this.addChatMessage({
+          message: message,
+          username: this.username,
+          isSameUser: true
+        });
+        this.socket.emit('stop typing');
+        this.socket.emit('new message', message);
       }
     }
   }, {
-    key: 'addChatMessage',
-    value: function addChatMessage(message, username) {
-      var isSameUser = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    key: 'addTypingMessage',
+    value: function addTypingMessage(data) {
+      data.message = 'is typing...';
+      data.typing = true;
 
+      this.addChatMessage(data);
+    }
+  }, {
+    key: 'removeTypingMessage',
+    value: function removeTypingMessage() {
+      var typingEl = document.querySelector('.message.typing');
+      if (typingEl) typingEl.parentNode.removeChild(typingEl);
+    }
+  }, {
+    key: 'addChatMessage',
+    value: function addChatMessage(data) {
       var usernameSpan = document.createElement('span');
       var messageBody = document.createElement('span');
       var messageEl = document.createElement('li');
 
-      if (isSameUser) usernameSpan.classList.add('same');
+      if (data.isSameUser) usernameSpan.classList.add('same');
       usernameSpan.classList.add('username');
-      usernameSpan.innerText = username;
+      usernameSpan.innerText = data.username;
 
       messageBody.classList.add('message-body');
-      messageBody.innerText = message;
+      messageBody.innerText = data.message;
 
+      if (data.typing) messageEl.classList.add('typing');
       messageEl.classList.add('message');
       messageEl.appendChild(usernameSpan);
       messageEl.appendChild(messageBody);
@@ -118,11 +165,12 @@ var ChatRoom = function () {
     key: 'addMessage',
     value: function addMessage(element) {
       this.messages.appendChild(element);
+      this.messages.scrollTop = this.messages.scrollHeight;
     }
   }, {
     key: 'attachSocketEvents',
     value: function attachSocketEvents() {
-      var _this = this;
+      var _this2 = this;
 
       // Whenever the server emits 'login', log the login message
       this.socket.on('login', function () {
@@ -130,49 +178,56 @@ var ChatRoom = function () {
         var welcomeMessages = ['Welcome to Wonder Chat!', 'You will be connected to the next available user.'];
 
         welcomeMessages.forEach(function (message) {
-          return _this.addLogMessage(message);
+          return _this2.addLogMessage(message);
         });
       });
 
       // Whenever the server emits 'new message', update the chat body
       this.socket.on('new message', function (data) {
-        _this.addChatMessage(data.message, data.username);
+        _this2.addChatMessage(data);
       });
 
       // Whenever the server emits 'user joined', log it in the chat body
       this.socket.on('user joined', function (data) {
-        _this.socket.pairId = data.pairId;
-        _this.addLogMessage('You have been connected to ' + data.username + '.');
+        _this2.connected = true;
+        _this2.addLogMessage('You have been connected to ' + data.username + '.');
       });
 
       // Whenever the server `emit`s 'user left', log it in the chat body
       this.socket.on('user left', function (data) {
-        _this.addLogMessage(data.username + ' has left.');
+        _this2.connected = false;
+        var disconnectMessages = [data.username + ' has left.', 'You will be connected to the next available user.'];
+
+        disconnectMessages.forEach(function (message) {
+          return _this2.addLogMessage(message);
+        });
       });
 
       // Whenever the server emits 'typing', show the typing message
-      // socket.on('typing', function (data) {
-      //   addChatTyping(data);
-      // });
+      this.socket.on('typing', function (data) {
+        _this2.addTypingMessage(data);
+      });
 
       // Whenever the server emits 'stop typing', kill the typing message
-      // socket.on('stop typing', function (data) {
-      //   removeChatTyping(data);
-      // });
+      this.socket.on('stop typing', function (data) {
+        _this2.removeTypingMessage(data);
+      });
 
       this.socket.on('disconnect', function () {
-        _this.addLogMessage('you have been disconnected');
+        _this2.connected = false;
+        _this2.addLogMessage('you have been disconnected');
       });
 
       this.socket.on('reconnect', function () {
-        _this.addLogMessage('you have been reconnected');
-        if (_this.username) {
-          socket.emit('add user', username);
+        _this2.addLogMessage('you have been reconnected');
+        if (_this2.username) {
+          _this2.connected = false;
+          _this2.socket.emit('add user', _this2.username);
         }
       });
 
       this.socket.on('reconnect_error', function () {
-        _this.addLogMessage('attempt to reconnect has failed');
+        _this2.addLogMessage('attempt to reconnect has failed');
       });
     }
   }]);
