@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "test": "jasmine"
+    "test": "jasmine",
+    "build": "babel public/javascripts/chatroom.js -o public/javascripts/build/chatroom.js"
   },
   "dependencies": {
     "body-parser": "~1.15.1",

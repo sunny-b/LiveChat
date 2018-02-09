@@ -12,9 +12,7 @@ a {
   color: #00B7FF;
 }
 
-/************
-  Pages
-************/
+/* Pages */
 
 .pages {
   height: 100%;
@@ -34,9 +32,7 @@ a {
   display: none;
 }
 
-/************
-  Pages
-************/
+/* Login */
 
 .login {
   background-color: #000;
@@ -74,9 +70,7 @@ a {
   font-weight: 100;
 }
 
-/************
-  Chat Page
-************/
+/* Chat Form */
 
 .message-form {
   background: #000;
@@ -101,7 +95,7 @@ a {
 }
 
 .messages {
-  list-style-type: none
+  list-style-type: none;
    margin: 0;
    padding: 0;
  }
@@ -112,4 +106,60 @@ a {
 
 .messages li:nth-child(odd) {
   background: #eee;
+}
+
+/* Font */
+
+.messages {
+  font-size: 150%;
+}
+
+.inputMessage {
+  font-size: 100%;
+}
+
+.log {
+  color: gray;
+  font-size: 70%;
+  margin: 5px;
+  text-align: center;
+}
+
+/* Messages */
+
+.chatArea {
+  height: 100%;
+  padding-bottom: 60px;
+}
+
+.messages {
+  height: 100%;
+  margin: 0;
+  overflow-y: scroll;
+  padding: 10px 20px 10px 20px;
+}
+
+.message.typing .messageBody {
+  color: gray;
+}
+
+.username {
+  font-weight: 700;
+  overflow: hidden;
+  padding-right: 15px;
+  text-align: right;
+}
+
+/* Input */
+
+.inputMessage {
+  border: 10px solid #000;
+  bottom: 0;
+  height: 60px;
+  left: 0;
+  outline: none;
+  padding-left: 10px;
+  position: absolute;
+  right: 0;
+  width: 100%;
 }

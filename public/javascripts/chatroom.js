@@ -4,7 +4,9 @@ class ChatRoom {
     this.chat = document.querySelector('.chat');
     this.messages = document.querySelector('.messages')
     this.usernameInput = document.querySelector('.username-input');
-    this.messageInput = document.querySelector('.message-form');
+    this.messageInput = document.querySelector('.message-input');
+    this.messageForm = document.querySelector('.message-form');
+    this.sendButton = document.querySelector('.send-button');
     this.socket = io();
 
     this.attachBrowserEvents();
@@ -22,6 +24,10 @@ class ChatRoom {
     return this.usernameInput.value.trim();
   }
 
+  retrieveMessage() {
+    return this.messageInput.value.trim();
+  }
+
   addUser(e) {
     if (e.which === 13) {
       const username = this.retrieveUsername();
@@ -36,17 +42,44 @@ class ChatRoom {
 
   attachBrowserEvents() {
     this.usernameInput.addEventListener('keydown', this.addUser.bind(this));
-    this.messageInput.addEventListener('submit', this.addMessage.bind(this));
+    this.messageInput.addEventListener('keyup', this.toggleInput.bind(this));
+    this.messageForm.addEventListener('submit', this.sendMessage.bind(this));
   }
 
-  addChatMessage(username, message) {
-    const usernameSpan = document.createElement('span').classList.add('username');
-    const messageBody = document.createElement('span').classList.add('message-body');
-    const messageEl = document.createElement('li').classList.add('message');
+  toggleInput(e) {
+    const message = this.retrieveMessage();
 
+    if (message) {
+      this.sendButton.disabled = false;
+    } else {
+      this.sendButton.disabled = true;
+    }
+  }
+
+  sendMessage(e) {
+    e.preventDefault();
+    const message = this.retrieveMessage();
+
+    if (message) {
+      this.messageInput.value = "";
+      this.sendButton.disabled = true;
+      this.addChatMessage(message, this.username)
+      this.socket.emit('new message', message);
+    }
+  }
+
+  addChatMessage(message, username) {
+    const usernameSpan = document.createElement('span');
+    const messageBody = document.createElement('span')
+    const messageEl = document.createElement('li');
+
+    usernameSpan.classList.add('username');
     usernameSpan.innerText = username;
+
+    messageBody.classList.add('message-body');
     messageBody.innerText = message;
 
+    messageEl.classList.add('message');
     messageEl.appendChild(usernameSpan);
     messageEl.appendChild(messageBody);
 
@@ -54,7 +87,8 @@ class ChatRoom {
   }
 
   addLogMessage(message) {
-    let logEl = document.createElement(li).classList.add('log');
+    let logEl = document.createElement('li')
+    logEl.classList.add('log');
     logEl.innerText = message;
 
     this.addMessage(logEl);
@@ -66,25 +100,25 @@ class ChatRoom {
 
   attachSocketEvents() {
     // Whenever the server emits 'login', log the login message
-    socket.on('login', function (data) {
+    this.socket.on('login', () => {
       // Display the welcome message
-      var message = "Welcome to Wonder Chat – ";
-      addLogMessage(message);
+      const message = "Welcome to Wonder Chat – ";
+      this.addLogMessage(message);
     });
 
     // Whenever the server emits 'new message', update the chat body
-    socket.on('new message', function (data) {
-      addChatMessage(data);
+    this.socket.on('new message', (data) => {
+      this.addChatMessage(data);
     });
 
     // Whenever the server emits 'user joined', log it in the chat body
-    socket.on('user joined', function (data) {
-      addLogMessage(data.username + ' joined');
+    this.socket.on('user joined', (data) => {
+      this.addLogMessage(data.username + ' joined');
     });
 
     // Whenever the server emits 'user left', log it in the chat body
-    socket.on('user left', function (data) {
-      addLogMessage(data.username + ' left');
+    this.socket.on('user left', (data) => {
+      this.addLogMessage(data.username + ' left');
     });
 
     // Whenever the server emits 'typing', show the typing message
@@ -97,19 +131,19 @@ class ChatRoom {
     //   removeChatTyping(data);
     // });
 
-    socket.on('disconnect', function () {
-      addLogMessage('you have been disconnected');
+    this.socket.on('disconnect', () => {
+      this.addLogMessage('you have been disconnected');
     });
 
-    socket.on('reconnect', function () {
-      addLogMessage('you have been reconnected');
-      if (username) {
+    this.socket.on('reconnect', () => {
+      this.addLogMessage('you have been reconnected');
+      if (this.username) {
         socket.emit('add user', username);
       }
     });
 
-    socket.on('reconnect_error', function () {
-      log('attempt to reconnect has failed');
+    this.socket.on('reconnect_error', () => {
+      this.addLogMessage('attempt to reconnect has failed');
     });
   }
 };
