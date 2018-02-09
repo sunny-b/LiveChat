@@ -64,7 +64,7 @@ class ChatRoom {
       this.messageInput.value = "";
       this.sendButton.disabled = true;
       this.addChatMessage(message, this.username, true)
-      this.socket.emit('new message', message);
+      this.socket.emit('new message', message, this.socket.pairId);
     }
   }
 
@@ -118,12 +118,13 @@ class ChatRoom {
 
     // Whenever the server emits 'user joined', log it in the chat body
     this.socket.on('user joined', (data) => {
-      this.addLogMessage(data.username + ' joined');
+      this.socket.pairId = data.pairId;
+      this.addLogMessage(`You have been connected to ${data.username}.`);
     });
 
-    // Whenever the server emits 'user left', log it in the chat body
+    // Whenever the server `emit`s 'user left', log it in the chat body
     this.socket.on('user left', (data) => {
-      this.addLogMessage(data.username + ' left');
+      this.addLogMessage(`${data.username} has left.`);
     });
 
     // Whenever the server emits 'typing', show the typing message
@@ -143,7 +144,7 @@ class ChatRoom {
     this.socket.on('reconnect', () => {
       this.addLogMessage('you have been reconnected');
       if (this.username) {
-        socket.emit('add user', username);
+        this.socket.emit('add user', username);
       }
     });
 

@@ -80,7 +80,7 @@ var ChatRoom = function () {
         this.messageInput.value = "";
         this.sendButton.disabled = true;
         this.addChatMessage(message, this.username, true);
-        this.socket.emit('new message', message);
+        this.socket.emit('new message', message, this.socket.pairId);
       }
     }
   }, {
@@ -141,12 +141,13 @@ var ChatRoom = function () {
 
       // Whenever the server emits 'user joined', log it in the chat body
       this.socket.on('user joined', function (data) {
-        _this.addLogMessage(data.username + ' joined');
+        _this.socket.pairId = data.pairId;
+        _this.addLogMessage('You have been connected to ' + data.username + '.');
       });
 
-      // Whenever the server emits 'user left', log it in the chat body
+      // Whenever the server `emit`s 'user left', log it in the chat body
       this.socket.on('user left', function (data) {
-        _this.addLogMessage(data.username + ' left');
+        _this.addLogMessage(data.username + ' has left.');
       });
 
       // Whenever the server emits 'typing', show the typing message
