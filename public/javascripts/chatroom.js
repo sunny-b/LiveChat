@@ -127,8 +127,14 @@ class ChatRoom {
     } else if (slashCommand === '/delay') {
       this.sendMessage(command);
     } else if (slashCommand === '/hop') {
-
+      this.handleHop();
     }
+  }
+
+  handleHop() {
+    this.addLogMessage('Find you a new pair...');
+    this.clearInputField();
+    this.socket.emit('hop');
   }
 
   sendDelayedMessage(message, delay) {
@@ -214,12 +220,7 @@ class ChatRoom {
     // Whenever the server emits 'login', log the login message
     this.socket.on('login', () => {
       // Display the welcome message
-      const welcomeMessages = [
-        'Welcome to Wonder Chat!',
-        'You will be connected to the next available user.'
-      ]
-
-      welcomeMessages.forEach(message => this.addLogMessage(message));
+      this.addLogMessage('Welcome to Wonder Chat!')
     });
 
     // Whenever the server emits 'new message', update the chat body
@@ -227,6 +228,7 @@ class ChatRoom {
       this.addChatMessage(data);
     });
 
+    // Whenever server emits 'waiting', let user know they are next in line
     this.socket.on('waiting', () => {
       this.addLogMessage('You will be connected to the next available user.');
     });
@@ -240,12 +242,9 @@ class ChatRoom {
     // Whenever the server `emit`s 'user left', log it in the chat body
     this.socket.on('user left', (data) => {
       this.connected = false;
-      const disconnectMessages = [
-        `${data.username} has left.`,
-        'You will be connected to the next available user.'
-      ];
-
-      disconnectMessages.forEach(message => this.addLogMessage(message));
+      this.removeTypingMessage();
+      this.addLogMessage(`${data.username} has left.`);
+      this.socket.emit('find new pair')
     });
 
     // Whenever the server emits 'typing', show the typing message
@@ -255,7 +254,7 @@ class ChatRoom {
 
     // Whenever the server emits 'stop typing', kill the typing message
     this.socket.on('stop typing', (data) => {
-      this.removeTypingMessage(data);
+      this.removeTypingMessage();
     });
 
     this.socket.on('disconnect', () => {

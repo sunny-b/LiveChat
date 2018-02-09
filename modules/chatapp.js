@@ -1,6 +1,5 @@
 class ChatApp {
   constructor(io) {
-    this.pairs = [];
     this.waitingList = [];
     this.io = io;
     this.addedUser = false;
@@ -9,7 +8,7 @@ class ChatApp {
   init() {
     this.attachIOEvents();
   }
-  
+
   // bind Socket.IO events to io connection
   attachIOEvents() {
     this.io.on('connection', (socket) => {
@@ -21,7 +20,31 @@ class ChatApp {
       socket.on('new message', this.addMessage(socket));
       socket.on('typing', this.addTyping(socket));
       socket.on('stop typing', this.stopTyping(socket));
+      socket.on('hop', this.handleHop(socket));
+      socket.on('find new pair', this.findNewPairFor(socket));
     });
+  }
+
+  handleHop(socket) {
+    return () => {
+      if (!socket.pairId) return;
+      let pairId = socket.pairId;
+
+      socket.exceptions.add(pairId);
+      socket.pairId = null;
+      this.findPair(socket);
+
+      socket.to(pairId).emit('user left', {
+        username: socket.username
+      });
+    }
+  }
+
+  findNewPairFor(socket) {
+    return () => {
+      socket.pairId = null;
+      this.findPair(socket);
+    }
   }
 
   addTyping(socket) {
@@ -75,6 +98,7 @@ class ChatApp {
       this.createPair(user, complement);
     } else {
       this.waitingList.push(user);
+      user.emit('waiting');
     }
   }
 
@@ -100,9 +124,6 @@ class ChatApp {
   }
 
   createPair(userOne, userTwo) {
-    const pair = [userOne, userTwo];
-    this.pairs.push(pair);
-
     userOne.pairId = userTwo.id;
     userTwo.pairId = userOne.id;
 
@@ -118,7 +139,7 @@ class ChatApp {
   }
 
   removePair(user) {
-
+    this.pairs = this.pairs.sele
   }
 
   dropUser(socket) {
@@ -127,8 +148,6 @@ class ChatApp {
         socket.to(socket.pairId).emit('user left', {
           username: socket.username
         });
-
-        this.removePair(socket);
       }
     }
   }

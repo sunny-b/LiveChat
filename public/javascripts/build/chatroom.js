@@ -157,7 +157,16 @@ var ChatRoom = function () {
         this.sendDelayedMessage(message, delayTime);
       } else if (slashCommand === '/delay') {
         this.sendMessage(command);
-      } else if (slashCommand === '/hop') {}
+      } else if (slashCommand === '/hop') {
+        this.handleHop();
+      }
+    }
+  }, {
+    key: 'handleHop',
+    value: function handleHop() {
+      this.addLogMessage('Find you a new pair...');
+      this.clearInputField();
+      this.socket.emit('hop');
     }
   }, {
     key: 'sendDelayedMessage',
@@ -256,16 +265,17 @@ var ChatRoom = function () {
       // Whenever the server emits 'login', log the login message
       this.socket.on('login', function () {
         // Display the welcome message
-        var welcomeMessages = ['Welcome to Wonder Chat!', 'You will be connected to the next available user.'];
-
-        welcomeMessages.forEach(function (message) {
-          return _this3.addLogMessage(message);
-        });
+        _this3.addLogMessage('Welcome to Wonder Chat!');
       });
 
       // Whenever the server emits 'new message', update the chat body
       this.socket.on('new message', function (data) {
         _this3.addChatMessage(data);
+      });
+
+      // Whenever server emits 'waiting', let user know they are next in line
+      this.socket.on('waiting', function () {
+        _this3.addLogMessage('You will be connected to the next available user.');
       });
 
       // Whenever the server emits 'user joined', log it in the chat body
@@ -277,11 +287,9 @@ var ChatRoom = function () {
       // Whenever the server `emit`s 'user left', log it in the chat body
       this.socket.on('user left', function (data) {
         _this3.connected = false;
-        var disconnectMessages = [data.username + ' has left.', 'You will be connected to the next available user.'];
-
-        disconnectMessages.forEach(function (message) {
-          return _this3.addLogMessage(message);
-        });
+        _this3.removeTypingMessage();
+        _this3.addLogMessage(data.username + ' has left.');
+        _this3.socket.emit('find new pair');
       });
 
       // Whenever the server emits 'typing', show the typing message
@@ -291,7 +299,7 @@ var ChatRoom = function () {
 
       // Whenever the server emits 'stop typing', kill the typing message
       this.socket.on('stop typing', function (data) {
-        _this3.removeTypingMessage(data);
+        _this3.removeTypingMessage();
       });
 
       this.socket.on('disconnect', function () {
