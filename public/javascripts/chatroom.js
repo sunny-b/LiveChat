@@ -9,6 +9,7 @@ class ChatRoom {
     this.sendButton = document.querySelector('.send-button');
 
     this.TYPING_TIMER_LENGTH = 400; //ms
+    this.SLASH_COMMANDS = new Set(['/delay', '/hop']);
     this.connected = false;
     this.typing = false;
     this.socket = io();
@@ -28,8 +29,34 @@ class ChatRoom {
     return this.usernameInput.value.trim();
   }
 
+  retrieveAndParseMessage() {
+    const rawMessage = this.retrieveMessage();
+    return this.parseMessage(rawMessage);
+  }
+
   retrieveMessage() {
     return this.messageInput.value.trim();
+  }
+
+  parseMessage(message) {
+    const splitStr = message.split(' ');
+    const command = splitStr[0];
+    const delay = splitStr[1];
+
+    switch(command) {
+      case '/hop':
+        return [command];
+      case '/delay':
+        if (String(Number(delay)) === delay) {
+          let messageBody = splitStr.slice(2).join(' ');
+
+          return [`${command} ${delay}`, messageBody];
+        } else {
+          return ['', message];
+        }
+      default:
+        return [ '', message];
+    }
   }
 
   addUser(e) {
@@ -48,7 +75,7 @@ class ChatRoom {
     this.usernameInput.addEventListener('keydown', this.addUser.bind(this));
     this.messageInput.addEventListener('keyup', this.toggleInput.bind(this));
     this.messageInput.addEventListener('keydown', this.updateTyping.bind(this));
-    this.messageForm.addEventListener('submit', this.sendMessage.bind(this));
+    this.messageForm.addEventListener('submit', this.handleMessage.bind(this));
   }
 
   updateTyping(e) {
@@ -57,6 +84,7 @@ class ChatRoom {
         this.typing = true;
         this.socket.emit('typing');
       }
+
       this.lastTypingTime = (new Date()).getTime();
 
       setTimeout(() => {
@@ -80,23 +108,61 @@ class ChatRoom {
     }
   }
 
-  sendMessage(e) {
+  handleMessage(e) {
     e.preventDefault();
-    const message = this.retrieveMessage();
+    const [ command, message ] = this.retrieveAndParseMessage();
 
-    if (message) {
-      this.typing = false;
-      this.lastTypingTime = (new Date()).getTime();
-      this.messageInput.value = "";
-      this.sendButton.disabled = true;
-      this.addChatMessage({
-        message: message,
-        username: this.username,
-        isSameUser: true
-      });
-      this.socket.emit('stop typing');
-      this.socket.emit('new message', message);
+    if (command) {
+      this.execute(command, message);
+    } else if (message) {
+      this.sendMessage(message);
     }
+  }
+
+  execute(command, message) {
+    let [ slashCommand, delayTime ] = command.split(' ');
+
+    if (slashCommand === '/delay' && message) {
+      this.sendDelayedMessage(message, delayTime);
+    } else if (slashCommand === '/delay') {
+      this.sendMessage(command);
+    } else if (slashCommand === '/hop') {
+
+    }
+  }
+
+  sendDelayedMessage(message, delay) {
+    this.clearInputField();
+
+    this.addChatMessage({
+      message: message,
+      username: this.username,
+      isSameUser: true
+    });
+
+    setTimeout(() => {
+      this.socket.emit('new message', message);
+    }, delay);
+  }
+
+  clearInputField() {
+    this.typing = false;
+    this.lastTypingTime = (new Date()).getTime();
+    this.messageInput.value = "";
+    this.sendButton.disabled = true;
+    this.socket.emit('stop typing');
+  }
+
+  sendMessage(message) {
+    this.clearInputField();
+
+    this.addChatMessage({
+      message: message,
+      username: this.username,
+      isSameUser: true
+    });
+
+    this.socket.emit('new message', message);
   }
 
   addTypingMessage(data) {
@@ -159,6 +225,10 @@ class ChatRoom {
     // Whenever the server emits 'new message', update the chat body
     this.socket.on('new message', (data) => {
       this.addChatMessage(data);
+    });
+
+    this.socket.on('waiting', () => {
+      this.addLogMessage('You will be connected to the next available user.');
     });
 
     // Whenever the server emits 'user joined', log it in the chat body
