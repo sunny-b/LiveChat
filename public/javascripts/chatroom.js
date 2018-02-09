@@ -63,16 +63,17 @@ class ChatRoom {
     if (message) {
       this.messageInput.value = "";
       this.sendButton.disabled = true;
-      this.addChatMessage(message, this.username)
+      this.addChatMessage(message, this.username, true)
       this.socket.emit('new message', message);
     }
   }
 
-  addChatMessage(message, username) {
+  addChatMessage(message, username, isSameUser = false) {
     const usernameSpan = document.createElement('span');
     const messageBody = document.createElement('span')
     const messageEl = document.createElement('li');
 
+    if (isSameUser) usernameSpan.classList.add('same');
     usernameSpan.classList.add('username');
     usernameSpan.innerText = username;
 
@@ -102,13 +103,17 @@ class ChatRoom {
     // Whenever the server emits 'login', log the login message
     this.socket.on('login', () => {
       // Display the welcome message
-      const message = "Welcome to Wonder Chat – ";
-      this.addLogMessage(message);
+      const welcomeMessages = [
+        'Welcome to Wonder Chat!',
+        'You will be connected to the next available user.'
+      ]
+
+      welcomeMessages.forEach(message => this.addLogMessage(message));
     });
 
     // Whenever the server emits 'new message', update the chat body
     this.socket.on('new message', (data) => {
-      this.addChatMessage(data);
+      this.addChatMessage(data.message, data.username);
     });
 
     // Whenever the server emits 'user joined', log it in the chat body

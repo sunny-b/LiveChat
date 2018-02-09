@@ -79,17 +79,20 @@ var ChatRoom = function () {
       if (message) {
         this.messageInput.value = "";
         this.sendButton.disabled = true;
-        this.addChatMessage(message, this.username);
+        this.addChatMessage(message, this.username, true);
         this.socket.emit('new message', message);
       }
     }
   }, {
     key: 'addChatMessage',
     value: function addChatMessage(message, username) {
+      var isSameUser = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
       var usernameSpan = document.createElement('span');
       var messageBody = document.createElement('span');
       var messageEl = document.createElement('li');
 
+      if (isSameUser) usernameSpan.classList.add('same');
       usernameSpan.classList.add('username');
       usernameSpan.innerText = username;
 
@@ -124,13 +127,16 @@ var ChatRoom = function () {
       // Whenever the server emits 'login', log the login message
       this.socket.on('login', function () {
         // Display the welcome message
-        var message = "Welcome to Wonder Chat – ";
-        _this.addLogMessage(message);
+        var welcomeMessages = ['Welcome to Wonder Chat!', 'You will be connected to the next available user.'];
+
+        welcomeMessages.forEach(function (message) {
+          return _this.addLogMessage(message);
+        });
       });
 
       // Whenever the server emits 'new message', update the chat body
       this.socket.on('new message', function (data) {
-        _this.addChatMessage(data);
+        _this.addChatMessage(data.message, data.username);
       });
 
       // Whenever the server emits 'user joined', log it in the chat body
@@ -159,7 +165,7 @@ var ChatRoom = function () {
 
       this.socket.on('reconnect', function () {
         _this.addLogMessage('you have been reconnected');
-        if (username) {
+        if (_this.username) {
           socket.emit('add user', username);
         }
       });

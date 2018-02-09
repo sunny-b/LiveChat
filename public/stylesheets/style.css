@@ -53,7 +53,8 @@ a {
   border: none;
   border-bottom: 2px solid #fff;
   outline: none;
-  padding-bottom: 15px;
+  padding-bottom: 10px;
+  margin-top: 10px;
   text-align: center;
   width: 400px;
   font-size: 200%;
@@ -87,11 +88,21 @@ a {
   font-size: 20px;
 }
 
+.message-input:focus {
+  outline: none;
+}
+
 .send-button {
   width: 9%;
-  background: rgb(130, 224, 255);
+  background-color: #558DFF;
   border: none;
   padding: 10px;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.send-button:disabled {
+  background-color: #ADC4F1;
 }
 
 .messages {
@@ -102,10 +113,6 @@ a {
 
 .messages li {
   padding: 5px 10px;
-}
-
-.messages li:nth-child(odd) {
-  background: #eee;
 }
 
 /* Font */
@@ -127,7 +134,7 @@ a {
 
 /* Messages */
 
-.chatArea {
+.chat-area {
   height: 100%;
   padding-bottom: 60px;
 }
@@ -148,18 +155,9 @@ a {
   overflow: hidden;
   padding-right: 15px;
   text-align: right;
+  color: #1569ef;
 }
 
-/* Input */
-
-.inputMessage {
-  border: 10px solid #000;
-  bottom: 0;
-  height: 60px;
-  left: 0;
-  outline: none;
-  padding-left: 10px;
-  position: absolute;
-  right: 0;
-  width: 100%;
+.username.same {
+  color: #ef1414;
 }

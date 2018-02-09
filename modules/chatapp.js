@@ -1,5 +1,7 @@
 class ChatApp {
   constructor(io) {
+    this.rooms = [];
+    this.waitingList = [];
     this.io = io;
     this.addedUser = false;
   }
@@ -41,11 +43,20 @@ class ChatApp {
       localSocket.username = username;
       localSocket.addedUser = true;
       localSocket.emit('login');
+      // this.findPair(localSocket);
 
       // echo globally (all clients) that a person has connected
       localSocket.broadcast.emit('user joined', {
         username: localSocket.username
       });
+    }
+  }
+
+  findPair(socket) {
+    if (this.waitingList.length > 0) {
+
+    } else {
+      this.waitingList.push(socket);
     }
   }
 
