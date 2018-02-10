@@ -10,8 +10,8 @@ This is my submission for the take home challenge from Wonder. It is written in 
 
 This chat application supports two slash commands:
 
-* '/hop'
-* '/delay {timeDelay} {message}'
+* `/hop`
+* `/delay {timeDelay} {message}`
 
 The '/delay' command takes two parameters, a timeDelay and message. It will only be executed if both those arguments are present, otherwise it will be sent as a normal message.
 
