@@ -10,7 +10,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+// Class that wraps around chat message and provides helper methods
 var ChatMessage = function () {
+  // parses string into command and message body when initialized
   function ChatMessage(text) {
     _classCallCheck(this, ChatMessage);
 
@@ -22,31 +24,49 @@ var ChatMessage = function () {
     this.body = _parse3[1];
   }
 
+  // check if slash command is present
+
+
   _createClass(ChatMessage, [{
     key: 'hasCommand',
     value: function hasCommand() {
       return this.command.length > 0;
     }
+
+    // check if delay slash command is present
+
   }, {
     key: 'hasDelayCommand',
     value: function hasDelayCommand() {
       return this.command.split(' ')[0] === '/delay';
     }
+
+    // check if hop slash command is present
+
   }, {
     key: 'hasHopCommand',
     value: function hasHopCommand() {
       return this.command.split(' ')[0] === '/hop';
     }
+
+    // retrieve the integer value for delay time in ms for delay slash command
+
   }, {
     key: 'delayTime',
     value: function delayTime() {
       return +this.command.split(' ')[1];
     }
+
+    // check is message is empty
+
   }, {
     key: 'isEmpty',
     value: function isEmpty() {
       return this.body.length === 0;
     }
+
+    // parses message into the command and the message body that will to shown in chat
+
   }, {
     key: '_parse',
     value: function _parse(message) {
@@ -69,6 +89,9 @@ var ChatMessage = function () {
           return ['', message];
       }
     }
+
+    // check if delay command has valid delay time and message afterwards
+
   }, {
     key: '_validDelayCommand',
     value: function _validDelayCommand(delay, messageBody) {

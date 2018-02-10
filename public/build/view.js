@@ -18,6 +18,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+// View class the encapsulates all browser and view logic
 var ChatView = function (_EventEmitter) {
   _inherits(ChatView, _EventEmitter);
 
@@ -94,6 +95,8 @@ var ChatView = function (_EventEmitter) {
   }, {
     key: 'updateTyping',
     value: function updateTyping(e) {
+      var _this2 = this;
+
       if (!this.typing) {
         this.typing = true;
         this.emit('typing');
@@ -101,7 +104,14 @@ var ChatView = function (_EventEmitter) {
 
       this.lastTypingTime = new Date().getTime();
 
-      setTimeout(typingTimeout, this.TYPING_TIMER_LENGTH);
+      setTimeout(function () {
+        var typingTimer = new Date().getTime();
+        var timeDiff = typingTimer - _this2.lastTypingTime;
+        if (timeDiff >= _this2.TYPING_TIMER_LENGTH && _this2.typing) {
+          _this2.emit('stop typing');
+          _this2.typing = false;
+        }
+      }, this.TYPING_TIMER_LENGTH);
     }
 
     // detects if user has stopped typing and updates typing status
@@ -140,6 +150,9 @@ var ChatView = function (_EventEmitter) {
       var message = this.retrieveMessage();
       this.emit('new message', message);
     }
+
+    // clears message input and emits stop typing event.
+
   }, {
     key: 'clearInputField',
     value: function clearInputField() {
@@ -149,12 +162,18 @@ var ChatView = function (_EventEmitter) {
       this.sendButton.disabled = true;
       this.emit('stop typing');
     }
+
+    // removes "User is typing..." message
+
   }, {
     key: 'removeTypingMessage',
     value: function removeTypingMessage() {
       var typingEl = document.querySelector('.message.typing');
       if (typingEl) typingEl.parentNode.removeChild(typingEl);
     }
+
+    // when user submits a message, clear their input and add to chat
+
   }, {
     key: 'sameUserMessage',
     value: function sameUserMessage(message, username) {
@@ -166,6 +185,9 @@ var ChatView = function (_EventEmitter) {
         isSameUser: true
       });
     }
+
+    // Creates HTML for chat message and adds to chat
+
   }, {
     key: 'addChatMessage',
     value: function addChatMessage(data) {
@@ -175,6 +197,9 @@ var ChatView = function (_EventEmitter) {
 
       this.addMessage(chatMessage);
     }
+
+    // generates HTML span for username
+
   }, {
     key: 'createUsernameSpan',
     value: function createUsernameSpan(data) {
@@ -186,6 +211,9 @@ var ChatView = function (_EventEmitter) {
 
       return usernameSpan;
     }
+
+    // generates HTML span for message body
+
   }, {
     key: 'createMessageSpan',
     value: function createMessageSpan(data) {
@@ -196,6 +224,9 @@ var ChatView = function (_EventEmitter) {
 
       return messageBody;
     }
+
+    // generates list item that combines username and message
+
   }, {
     key: 'createChatMessage',
     value: function createChatMessage(data, usernameSpan, messageBody) {
@@ -208,6 +239,9 @@ var ChatView = function (_EventEmitter) {
 
       return messageEl;
     }
+
+    // Add a status log message to chat
+
   }, {
     key: 'addLogMessage',
     value: function addLogMessage(message) {
@@ -217,6 +251,9 @@ var ChatView = function (_EventEmitter) {
 
       this.addMessage(logEl);
     }
+
+    // Add 'User is typing...' message to chat
+
   }, {
     key: 'addTypingMessage',
     value: function addTypingMessage(data) {
@@ -225,6 +262,9 @@ var ChatView = function (_EventEmitter) {
 
       this.addChatMessage(data);
     }
+
+    // Appends HTML chat message to chat and scrolls to bottom
+
   }, {
     key: 'addMessage',
     value: function addMessage(element) {

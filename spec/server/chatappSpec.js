@@ -218,11 +218,12 @@ describe('ChatApp', () => {
       const data = {
         username: user.username
       };
+      const pairId = user.pairId;
 
       spyOn(user, 'broadcast');
       closure();
 
-      expect(user.broadcast).toHaveBeenCalledWith(evt, data);
+      expect(user.broadcast).toHaveBeenCalledWith(evt, data, pairId);
     });
 
     afterEach(() => {

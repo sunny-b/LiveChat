@@ -63,17 +63,15 @@ class ChatView extends EventEmitter {
 
     this.lastTypingTime = (new Date()).getTime();
 
-    setTimeout(typingTimeout, this.TYPING_TIMER_LENGTH);
-  }
-
-  // detects if user has stopped typing and updates typing status
-  typingTimeout() {
-    const typingTimer = (new Date()).getTime();
-    const timeDiff = typingTimer - this.lastTypingTime;
-    if (timeDiff >= this.TYPING_TIMER_LENGTH && this.typing) {
-      this.emit('stop typing');
-      this.typing = false;
-    }
+    // detects if user has stopped typing and updates typing status
+    setTimeout(() => {
+      const typingTimer = (new Date()).getTime();
+      const timeDiff = typingTimer - this.lastTypingTime;
+      if (timeDiff >= this.TYPING_TIMER_LENGTH && this.typing) {
+        this.emit('stop typing');
+        this.typing = false;
+      }
+    }, this.TYPING_TIMER_LENGTH);
   }
 
   // toggles disabled status of message depending if input is empty

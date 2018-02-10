@@ -5,8 +5,9 @@
   "scripts": {
     "start": "node app.js",
     "test": "jasmine",
-    "build": "babel public/javascripts -d public/build",
-    "compile": "browserify public/build/main.js -o public/build/bundle.js"
+    "build": "npm run transpile && npm run modularize",
+    "modularize": "browserify public/build/main.js -o public/build/bundle.js",
+    "transpile": "babel public/javascripts -d public/build"
   },
   "dependencies": {
     "body-parser": "~1.15.1",
