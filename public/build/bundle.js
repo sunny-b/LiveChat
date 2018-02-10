@@ -1,6 +1,99 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+var _wonderchat = require('./wonderchat');
+
+var _wonderchat2 = _interopRequireDefault(_wonderchat);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+new _wonderchat2.default();
+},{"./wonderchat":3}],2:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ChatMessage = function () {
+  function ChatMessage(text) {
+    _classCallCheck(this, ChatMessage);
+
+    var _parse2 = this._parse(text);
+
+    var _parse3 = _slicedToArray(_parse2, 2);
+
+    this.command = _parse3[0];
+    this.body = _parse3[1];
+  }
+
+  _createClass(ChatMessage, [{
+    key: 'hasCommand',
+    value: function hasCommand() {
+      return this.command.length > 0;
+    }
+  }, {
+    key: 'hasDelayCommand',
+    value: function hasDelayCommand() {
+      return this.command.split(' ')[0] === '/delay';
+    }
+  }, {
+    key: 'hasHopCommand',
+    value: function hasHopCommand() {
+      return this.command.split(' ')[0] === '/hop';
+    }
+  }, {
+    key: 'delayTime',
+    value: function delayTime() {
+      return +this.command.split(' ')[1];
+    }
+  }, {
+    key: 'isEmpty',
+    value: function isEmpty() {
+      return this.body.length === 0;
+    }
+  }, {
+    key: '_parse',
+    value: function _parse(message) {
+      var splitStr = message.split(' ');
+      var command = splitStr[0];
+      var delay = splitStr[1];
+
+      switch (command) {
+        case '/hop':
+          return [command, ''];
+        case '/delay':
+          var messageBody = splitStr.slice(2).join(' ');
+
+          if (this._validDelayCommand(delay, messageBody)) {
+            return [command + ' ' + delay, messageBody];
+          } else {
+            return ['', message];
+          }
+        default:
+          return ['', message];
+      }
+    }
+  }, {
+    key: '_validDelayCommand',
+    value: function _validDelayCommand(delay, messageBody) {
+      return String(parseInt(delay)) === delay && !!messageBody;
+    }
+  }]);
+
+  return ChatMessage;
+}();
+
+exports.default = ChatMessage;
+},{}],3:[function(require,module,exports){
+'use strict';
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -15,9 +108,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ChatRoom = function () {
-  function ChatRoom() {
-    _classCallCheck(this, ChatRoom);
+var WonderChat = function () {
+  function WonderChat() {
+    _classCallCheck(this, WonderChat);
 
     this.login = document.querySelector('.login');
     this.chat = document.querySelector('.chat');
@@ -36,7 +129,7 @@ var ChatRoom = function () {
     this.attachSocketEvents();
   }
 
-  _createClass(ChatRoom, [{
+  _createClass(WonderChat, [{
     key: 'displayChat',
     value: function displayChat() {
       this.usernameInput.removeEventListener('keydown', this.addUser);
@@ -290,103 +383,10 @@ var ChatRoom = function () {
     }
   }]);
 
-  return ChatRoom;
+  return WonderChat;
 }();
 
 ;
 
-exports.default = ChatRoom;
-},{"./message":3}],2:[function(require,module,exports){
-'use strict';
-
-var _chatroom = require('./chatroom');
-
-var _chatroom2 = _interopRequireDefault(_chatroom);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-new _chatroom2.default();
-},{"./chatroom":1}],3:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Message = function () {
-  function Message(text) {
-    _classCallCheck(this, Message);
-
-    var _parse2 = this._parse(text);
-
-    var _parse3 = _slicedToArray(_parse2, 2);
-
-    this.command = _parse3[0];
-    this.body = _parse3[1];
-  }
-
-  _createClass(Message, [{
-    key: 'hasCommand',
-    value: function hasCommand() {
-      return this.command.length > 0;
-    }
-  }, {
-    key: 'hasDelayCommand',
-    value: function hasDelayCommand() {
-      return this.command.split(' ')[0] === '/delay';
-    }
-  }, {
-    key: 'hasHopCommand',
-    value: function hasHopCommand() {
-      return this.command.split(' ')[0] === '/hop';
-    }
-  }, {
-    key: 'delayTime',
-    value: function delayTime() {
-      return +this.command.split(' ')[1];
-    }
-  }, {
-    key: 'isEmpty',
-    value: function isEmpty() {
-      return this.body.length === 0;
-    }
-  }, {
-    key: '_parse',
-    value: function _parse(message) {
-      var splitStr = message.split(' ');
-      var command = splitStr[0];
-      var delay = splitStr[1];
-
-      switch (command) {
-        case '/hop':
-          return [command, ''];
-        case '/delay':
-          var messageBody = splitStr.slice(2).join(' ');
-
-          if (this._validDelayCommand(delay, messageBody)) {
-            return [command + ' ' + delay, messageBody];
-          } else {
-            return ['', message];
-          }
-        default:
-          return ['', message];
-      }
-    }
-  }, {
-    key: '_validDelayCommand',
-    value: function _validDelayCommand(delay, messageBody) {
-      return String(parseInt(delay)) === delay && !!messageBody;
-    }
-  }]);
-
-  return Message;
-}();
-
-exports.default = Message;
-},{}]},{},[2]);
+exports.default = WonderChat;
+},{"./message":2}]},{},[1]);

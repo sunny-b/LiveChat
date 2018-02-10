@@ -2,8 +2,8 @@
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var View = function View() {
-  _classCallCheck(this, View);
+var ChatView = function ChatView() {
+  _classCallCheck(this, ChatView);
 
   this.login = document.querySelector('.login');
   this.chat = document.querySelector('.chat');
@@ -12,4 +12,6 @@ var View = function View() {
   this.messageInput = document.querySelector('.message-input');
   this.messageForm = document.querySelector('.message-form');
   this.sendButton = document.querySelector('.send-button');
+
+  this.attachBrowserEvents();
 };

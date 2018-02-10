@@ -1,3 +1,3 @@
-import ChatRoom from './chatroom';
+import WonderChat from './wonderchat';
 
-new ChatRoom();
+new WonderChat();

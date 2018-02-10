@@ -1,4 +1,4 @@
-class View {
+class ChatView {
   constructor() {
     this.login = document.querySelector('.login');
     this.chat = document.querySelector('.chat');
@@ -7,5 +7,7 @@ class View {
     this.messageInput = document.querySelector('.message-input');
     this.messageForm = document.querySelector('.message-form');
     this.sendButton = document.querySelector('.send-button');
+
+    this.attachBrowserEvents();
   }
 }

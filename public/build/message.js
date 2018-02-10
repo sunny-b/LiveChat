@@ -10,9 +10,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Message = function () {
-  function Message(text) {
-    _classCallCheck(this, Message);
+var ChatMessage = function () {
+  function ChatMessage(text) {
+    _classCallCheck(this, ChatMessage);
 
     var _parse2 = this._parse(text);
 
@@ -22,7 +22,7 @@ var Message = function () {
     this.body = _parse3[1];
   }
 
-  _createClass(Message, [{
+  _createClass(ChatMessage, [{
     key: 'hasCommand',
     value: function hasCommand() {
       return this.command.length > 0;
@@ -76,7 +76,7 @@ var Message = function () {
     }
   }]);
 
-  return Message;
+  return ChatMessage;
 }();
 
-exports.default = Message;
+exports.default = ChatMessage;

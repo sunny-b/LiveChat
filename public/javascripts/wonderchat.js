@@ -1,6 +1,6 @@
-import Message from './message';
+import ChatMessage from './message';
 
-class ChatRoom {
+class WonderChat {
   constructor() {
     this.login = document.querySelector('.login');
     this.chat = document.querySelector('.chat');
@@ -85,7 +85,7 @@ class ChatRoom {
 
   handleMessage(e) {
     e.preventDefault();
-    const message = new Message(this.retrieveMessage());
+    const message = new ChatMessage(this.retrieveMessage());
 
     if (message.hasCommand()) {
       this.execute(message);
@@ -247,4 +247,4 @@ class ChatRoom {
   }
 };
 
-export default ChatRoom;
+export default WonderChat;

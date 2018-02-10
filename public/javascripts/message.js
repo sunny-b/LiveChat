@@ -1,4 +1,4 @@
-class Message {
+class ChatMessage {
   constructor(text) {
     [ this.command, this.body ] = this._parse(text)
   }
@@ -49,4 +49,4 @@ class Message {
   }
 }
 
-export default Message;
+export default ChatMessage;
