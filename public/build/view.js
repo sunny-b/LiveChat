@@ -37,18 +37,24 @@ var ChatView = function (_EventEmitter) {
     _this.TYPING_TIMER_LENGTH = 400; //ms
     _this.typing = false;
 
-    _this.attachBrowserEvents();
+    _this.attachEventListeners();
     return _this;
   }
 
+  // attach Browser Event Listeners
+
+
   _createClass(ChatView, [{
-    key: 'attachBrowserEvents',
-    value: function attachBrowserEvents() {
+    key: 'attachEventListeners',
+    value: function attachEventListeners() {
       this.usernameInput.addEventListener('keydown', this.addUser.bind(this));
       this.messageInput.addEventListener('keyup', this.toggleInput.bind(this));
       this.messageInput.addEventListener('keydown', this.updateTyping.bind(this));
       this.messageForm.addEventListener('submit', this.handleMessage.bind(this));
     }
+
+    // Display chat board when user creates username
+
   }, {
     key: 'displayChat',
     value: function displayChat() {
@@ -67,6 +73,9 @@ var ChatView = function (_EventEmitter) {
     value: function retrieveMessage() {
       return this.messageInput.value.trim();
     }
+
+    // when user submits username, check if valid and emit event
+
   }, {
     key: 'addUser',
     value: function addUser(e) {
@@ -79,11 +88,12 @@ var ChatView = function (_EventEmitter) {
         }
       }
     }
+
+    // update typing status of user and emit event if status changes
+
   }, {
     key: 'updateTyping',
     value: function updateTyping(e) {
-      var _this2 = this;
-
       if (!this.typing) {
         this.typing = true;
         this.emit('typing');
@@ -91,15 +101,24 @@ var ChatView = function (_EventEmitter) {
 
       this.lastTypingTime = new Date().getTime();
 
-      setTimeout(function () {
-        var typingTimer = new Date().getTime();
-        var timeDiff = typingTimer - _this2.lastTypingTime;
-        if (timeDiff >= _this2.TYPING_TIMER_LENGTH && _this2.typing) {
-          _this2.emit('stop typing');
-          _this2.typing = false;
-        }
-      }, this.TYPING_TIMER_LENGTH);
+      setTimeout(typingTimeout, this.TYPING_TIMER_LENGTH);
     }
+
+    // detects if user has stopped typing and updates typing status
+
+  }, {
+    key: 'typingTimeout',
+    value: function typingTimeout() {
+      var typingTimer = new Date().getTime();
+      var timeDiff = typingTimer - this.lastTypingTime;
+      if (timeDiff >= this.TYPING_TIMER_LENGTH && this.typing) {
+        this.emit('stop typing');
+        this.typing = false;
+      }
+    }
+
+    // toggles disabled status of message depending if input is empty
+
   }, {
     key: 'toggleInput',
     value: function toggleInput(e) {
@@ -111,6 +130,9 @@ var ChatView = function (_EventEmitter) {
         this.sendButton.disabled = true;
       }
     }
+
+    // when message is submitted, retrieve the string and emit event
+
   }, {
     key: 'handleMessage',
     value: function handleMessage(e) {

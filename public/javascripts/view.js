@@ -1,5 +1,6 @@
 import EventEmitter from 'eventemitter3';
 
+// View class the encapsulates all browser and view logic
 class ChatView extends EventEmitter {
   constructor() {
     super();
@@ -14,16 +15,18 @@ class ChatView extends EventEmitter {
     this.TYPING_TIMER_LENGTH = 400; //ms
     this.typing = false;
 
-    this.attachBrowserEvents();
+    this.attachEventListeners();
   }
 
-  attachBrowserEvents() {
+  // attach Browser Event Listeners
+  attachEventListeners() {
     this.usernameInput.addEventListener('keydown', this.addUser.bind(this));
     this.messageInput.addEventListener('keyup', this.toggleInput.bind(this));
     this.messageInput.addEventListener('keydown', this.updateTyping.bind(this));
     this.messageForm.addEventListener('submit', this.handleMessage.bind(this));
   }
 
+  // Display chat board when user creates username
   displayChat() {
     this.usernameInput.removeEventListener('keydown', this.addUser);
     this.login.classList.add('hide');
@@ -39,6 +42,7 @@ class ChatView extends EventEmitter {
     return this.messageInput.value.trim();
   }
 
+  // when user submits username, check if valid and emit event
   addUser(e) {
     if (e.which === 13) {
       const username = this.retrieveUsername();
@@ -50,6 +54,7 @@ class ChatView extends EventEmitter {
     }
   }
 
+  // update typing status of user and emit event if status changes
   updateTyping(e) {
     if (!this.typing) {
       this.typing = true;
@@ -58,16 +63,20 @@ class ChatView extends EventEmitter {
 
     this.lastTypingTime = (new Date()).getTime();
 
-    setTimeout(() => {
-      const typingTimer = (new Date()).getTime();
-      const timeDiff = typingTimer - this.lastTypingTime;
-      if (timeDiff >= this.TYPING_TIMER_LENGTH && this.typing) {
-        this.emit('stop typing');
-        this.typing = false;
-      }
-    }, this.TYPING_TIMER_LENGTH);
+    setTimeout(typingTimeout, this.TYPING_TIMER_LENGTH);
   }
 
+  // detects if user has stopped typing and updates typing status
+  typingTimeout() {
+    const typingTimer = (new Date()).getTime();
+    const timeDiff = typingTimer - this.lastTypingTime;
+    if (timeDiff >= this.TYPING_TIMER_LENGTH && this.typing) {
+      this.emit('stop typing');
+      this.typing = false;
+    }
+  }
+
+  // toggles disabled status of message depending if input is empty
   toggleInput(e) {
     const message = this.retrieveMessage();
 
@@ -78,12 +87,14 @@ class ChatView extends EventEmitter {
     }
   }
 
+  // when message is submitted, retrieve the string and emit event
   handleMessage(e) {
     e.preventDefault();
     const message = this.retrieveMessage();
     this.emit('new message', message)
   }
 
+  // clears message input and emits stop typing event.
   clearInputField() {
     this.typing = false;
     this.lastTypingTime = (new Date()).getTime();
@@ -92,11 +103,13 @@ class ChatView extends EventEmitter {
     this.emit('stop typing');
   }
 
+  // removes "User is typing..." message
   removeTypingMessage() {
     const typingEl = document.querySelector('.message.typing');
     if (typingEl) typingEl.parentNode.removeChild(typingEl);
   }
 
+  // when user submits a message, clear their input and add to chat
   sameUserMessage(message, username) {
     this.clearInputField();
 
@@ -107,6 +120,7 @@ class ChatView extends EventEmitter {
     });
   }
 
+  // Creates HTML for chat message and adds to chat
   addChatMessage(data) {
     const usernameSpan = this.createUsernameSpan(data);
     const messageBody = this.createMessageSpan(data);
@@ -115,6 +129,7 @@ class ChatView extends EventEmitter {
     this.addMessage(chatMessage);
   }
 
+  // generates HTML span for username
   createUsernameSpan(data) {
     const usernameSpan = document.createElement('span');
 
@@ -125,6 +140,7 @@ class ChatView extends EventEmitter {
     return usernameSpan;
   }
 
+  // generates HTML span for message body
   createMessageSpan(data) {
     const messageBody = document.createElement('span');
 
@@ -134,6 +150,7 @@ class ChatView extends EventEmitter {
     return messageBody;
   }
 
+  // generates list item that combines username and message
   createChatMessage(data, usernameSpan, messageBody) {
     const messageEl = document.createElement('li');
 
@@ -145,6 +162,7 @@ class ChatView extends EventEmitter {
     return messageEl;
   }
 
+  // Add a status log message to chat
   addLogMessage(message) {
     let logEl = document.createElement('li')
     logEl.classList.add('log');
@@ -153,6 +171,7 @@ class ChatView extends EventEmitter {
     this.addMessage(logEl);
   }
 
+  // Add 'User is typing...' message to chat
   addTypingMessage(data) {
     data.message = 'is typing...'
     data.typing = true;
@@ -160,6 +179,7 @@ class ChatView extends EventEmitter {
     this.addChatMessage(data);
   }
 
+  // Appends HTML chat message to chat and scrolls to bottom
   addMessage(element) {
     this.messages.appendChild(element);
     this.messages.scrollTop = this.messages.scrollHeight;

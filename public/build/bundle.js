@@ -469,18 +469,24 @@ var ChatView = function (_EventEmitter) {
     _this.TYPING_TIMER_LENGTH = 400; //ms
     _this.typing = false;
 
-    _this.attachBrowserEvents();
+    _this.attachEventListeners();
     return _this;
   }
 
+  // attach Browser Event Listeners
+
+
   _createClass(ChatView, [{
-    key: 'attachBrowserEvents',
-    value: function attachBrowserEvents() {
+    key: 'attachEventListeners',
+    value: function attachEventListeners() {
       this.usernameInput.addEventListener('keydown', this.addUser.bind(this));
       this.messageInput.addEventListener('keyup', this.toggleInput.bind(this));
       this.messageInput.addEventListener('keydown', this.updateTyping.bind(this));
       this.messageForm.addEventListener('submit', this.handleMessage.bind(this));
     }
+
+    // Display chat board when user creates username
+
   }, {
     key: 'displayChat',
     value: function displayChat() {
@@ -499,6 +505,9 @@ var ChatView = function (_EventEmitter) {
     value: function retrieveMessage() {
       return this.messageInput.value.trim();
     }
+
+    // when user submits username, check if valid and emit event
+
   }, {
     key: 'addUser',
     value: function addUser(e) {
@@ -511,11 +520,12 @@ var ChatView = function (_EventEmitter) {
         }
       }
     }
+
+    // update typing status of user and emit event if status changes
+
   }, {
     key: 'updateTyping',
     value: function updateTyping(e) {
-      var _this2 = this;
-
       if (!this.typing) {
         this.typing = true;
         this.emit('typing');
@@ -523,15 +533,24 @@ var ChatView = function (_EventEmitter) {
 
       this.lastTypingTime = new Date().getTime();
 
-      setTimeout(function () {
-        var typingTimer = new Date().getTime();
-        var timeDiff = typingTimer - _this2.lastTypingTime;
-        if (timeDiff >= _this2.TYPING_TIMER_LENGTH && _this2.typing) {
-          _this2.emit('stop typing');
-          _this2.typing = false;
-        }
-      }, this.TYPING_TIMER_LENGTH);
+      setTimeout(typingTimeout, this.TYPING_TIMER_LENGTH);
     }
+
+    // detects if user has stopped typing and updates typing status
+
+  }, {
+    key: 'typingTimeout',
+    value: function typingTimeout() {
+      var typingTimer = new Date().getTime();
+      var timeDiff = typingTimer - this.lastTypingTime;
+      if (timeDiff >= this.TYPING_TIMER_LENGTH && this.typing) {
+        this.emit('stop typing');
+        this.typing = false;
+      }
+    }
+
+    // toggles disabled status of message depending if input is empty
+
   }, {
     key: 'toggleInput',
     value: function toggleInput(e) {
@@ -543,6 +562,9 @@ var ChatView = function (_EventEmitter) {
         this.sendButton.disabled = true;
       }
     }
+
+    // when message is submitted, retrieve the string and emit event
+
   }, {
     key: 'handleMessage',
     value: function handleMessage(e) {
@@ -668,6 +690,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+// Main Application class that serves as controller between server and view
 var WonderChat = function () {
   function WonderChat() {
     _classCallCheck(this, WonderChat);
@@ -676,13 +699,16 @@ var WonderChat = function () {
     this.socket = io();
     this.view = new _view2.default();
 
-    this.attachSocketEvents();
-    this.attachViewEvents();
+    this.attachSocketListeners();
+    this.attachViewListeners();
   }
 
+  // Attach listeners to events emitted from view
+
+
   _createClass(WonderChat, [{
-    key: 'attachViewEvents',
-    value: function attachViewEvents() {
+    key: 'attachViewListeners',
+    value: function attachViewListeners() {
       var _this = this;
 
       this.view.on('add user', function (username) {
@@ -698,12 +724,18 @@ var WonderChat = function () {
         return _this.socket.emit('stop typing');
       });
     }
+
+    // Handles user login. Assigns username and emits to server
+
   }, {
     key: 'handleAddUser',
     value: function handleAddUser(username) {
       this.username = username;
       this.socket.emit('add user', username);
     }
+
+    // Create new message and detect if slash commands are present
+
   }, {
     key: 'handleNewMessage',
     value: function handleNewMessage(messageStr) {
@@ -715,6 +747,9 @@ var WonderChat = function () {
         this.sendMessage(message.body);
       }
     }
+
+    // Execute the slash command
+
   }, {
     key: 'execute',
     value: function execute(message) {
@@ -724,6 +759,9 @@ var WonderChat = function () {
         this.handleHop();
       }
     }
+
+    // Tells user new pair is being found and tells server to "hop"
+
   }, {
     key: 'handleHop',
     value: function handleHop() {
@@ -731,6 +769,9 @@ var WonderChat = function () {
       this.view.addLogMessage('Finding you a new pair...');
       this.socket.emit('hop');
     }
+
+    // sends delayed message to server
+
   }, {
     key: 'sendDelayedMessage',
     value: function sendDelayedMessage(message, delay) {
@@ -742,6 +783,9 @@ var WonderChat = function () {
         _this2.socket.emit('new message', message);
       }, delay);
     }
+
+    // sends normal chat message to server
+
   }, {
     key: 'sendMessage',
     value: function sendMessage(message) {
@@ -749,45 +793,40 @@ var WonderChat = function () {
 
       this.socket.emit('new message', message);
     }
+
+    // attachs listeners to socket.io events from server.
+
   }, {
-    key: 'attachSocketEvents',
-    value: function attachSocketEvents() {
+    key: 'attachSocketListeners',
+    value: function attachSocketListeners() {
       var _this3 = this;
 
-      // Whenever the server emits 'login', log the login message
       this.socket.on('login', function () {
-        // Display the welcome message
-        _this3.view.addLogMessage('Welcome to Wonder Chat!');
+        return _this3.view.addLogMessage('Welcome to Wonder Chat!');
       });
-
-      // Whenever the server emits 'new message', update the chat body
       this.socket.on('new message', function (data) {
-        _this3.view.addChatMessage(data);
+        return _this3.view.addChatMessage(data);
       });
 
-      // Whenever server emits 'waiting', let user know they are next in line
       this.socket.on('waiting', function () {
         _this3.view.addLogMessage('You will be connected to the next available user.');
       });
 
-      // Whenever the server emits 'user joined', log it in the chat body
       this.socket.on('user joined', function (data) {
         _this3.view.addLogMessage('You have been connected to ' + data.username + '.');
       });
 
-      // Whenever the server `emit`s 'user left', log it in the chat body
+      // Whenever user leaves room, remove their typing message and let other user know
       this.socket.on('user left', function (data) {
         _this3.view.removeTypingMessage();
         _this3.view.addLogMessage(data.username + ' has left.');
         _this3.socket.emit('find new pair');
       });
 
-      // Whenever the server emits 'typing', show the typing message
       this.socket.on('typing', function (data) {
         _this3.view.addTypingMessage(data);
       });
 
-      // Whenever the server emits 'stop typing', kill the typing message
       this.socket.on('stop typing', function (data) {
         _this3.view.removeTypingMessage();
       });
