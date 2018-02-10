@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node app.js",
     "test": "jasmine",
-    "build": "babel public/javascripts/chatroom.js -o public/javascripts/build/chatroom.js"
+    "build": "babel public/javascripts -d public/build",
+    "compile": "browserify public/build/main.js -o public/build/bundle.js"
   },
   "dependencies": {
     "body-parser": "~1.15.1",

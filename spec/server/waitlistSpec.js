@@ -53,6 +53,17 @@ describe('WaitList', () => {
       waitlist.remove(user);
       expect(waitlist.list).toEqual([]);
     });
+
+    it('does remove element if element is not in array', () => {
+      const waitlist = new WaitList();
+      const user1 = {id: 1};
+      const user2 = {id: 2}
+      waitlist.add(user1);
+      expect(waitlist.list).toEqual([user1]);
+
+      waitlist.remove(user2);
+      expect(waitlist.list).toEqual([user1]);
+    });
   });
 
   describe('findComplement', () => {

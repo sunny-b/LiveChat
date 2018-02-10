@@ -21,8 +21,8 @@ class User {
     this.socket.emit(evt, data);
   }
 
-  broadcast(evt, data) {
-    this.socket.to(this.pairId).emit(evt, data);
+  broadcast(evt, data, pairId = this.pairId) {
+    this.socket.to(pairId).emit(evt, data);
   }
 }
 

@@ -1,3 +1,5 @@
+import Message from './message';
+
 class ChatRoom {
   constructor() {
     this.login = document.querySelector('.login');
@@ -9,7 +11,6 @@ class ChatRoom {
     this.sendButton = document.querySelector('.send-button');
 
     this.TYPING_TIMER_LENGTH = 400; //ms
-    this.SLASH_COMMANDS = new Set(['/delay', '/hop']);
     this.connected = false;
     this.typing = false;
     this.socket = io();
@@ -29,34 +30,8 @@ class ChatRoom {
     return this.usernameInput.value.trim();
   }
 
-  retrieveAndParseMessage() {
-    const rawMessage = this.retrieveMessage();
-    return this.parseMessage(rawMessage);
-  }
-
   retrieveMessage() {
     return this.messageInput.value.trim();
-  }
-
-  parseMessage(message) {
-    const splitStr = message.split(' ');
-    const command = splitStr[0];
-    const delay = splitStr[1];
-
-    switch(command) {
-      case '/hop':
-        return [command];
-      case '/delay':
-        if (String(Number(delay)) === delay) {
-          let messageBody = splitStr.slice(2).join(' ');
-
-          return [`${command} ${delay}`, messageBody];
-        } else {
-          return ['', message];
-        }
-      default:
-        return [ '', message];
-    }
   }
 
   addUser(e) {
@@ -110,23 +85,19 @@ class ChatRoom {
 
   handleMessage(e) {
     e.preventDefault();
-    const [ command, message ] = this.retrieveAndParseMessage();
+    const message = new Message(this.retrieveMessage());
 
-    if (command) {
-      this.execute(command, message);
-    } else if (message) {
-      this.sendMessage(message);
+    if (message.hasCommand()) {
+      this.execute(message);
+    } else if (!message.isEmpty()) {
+      this.sendMessage(message.body);
     }
   }
 
-  execute(command, message) {
-    let [ slashCommand, delayTime ] = command.split(' ');
-
-    if (slashCommand === '/delay' && message) {
-      this.sendDelayedMessage(message, delayTime);
-    } else if (slashCommand === '/delay') {
-      this.sendMessage(command);
-    } else if (slashCommand === '/hop') {
+  execute(message) {
+    if (message.hasDelayCommand()) {
+      this.sendDelayedMessage(message.body, message.delayTime());
+    } else if (message.hasHopCommand()) {
       this.handleHop();
     }
   }
@@ -275,3 +246,5 @@ class ChatRoom {
     });
   }
 };
+
+export default ChatRoom;

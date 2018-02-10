@@ -1,8 +1,16 @@
 'use strict';
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _message = require('./message');
+
+var _message2 = _interopRequireDefault(_message);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -19,7 +27,6 @@ var ChatRoom = function () {
     this.sendButton = document.querySelector('.send-button');
 
     this.TYPING_TIMER_LENGTH = 400; //ms
-    this.SLASH_COMMANDS = new Set(['/delay', '/hop']);
     this.connected = false;
     this.typing = false;
     this.socket = io();
@@ -42,37 +49,9 @@ var ChatRoom = function () {
       return this.usernameInput.value.trim();
     }
   }, {
-    key: 'retrieveAndParseMessage',
-    value: function retrieveAndParseMessage() {
-      var rawMessage = this.retrieveMessage();
-      return this.parseMessage(rawMessage);
-    }
-  }, {
     key: 'retrieveMessage',
     value: function retrieveMessage() {
       return this.messageInput.value.trim();
-    }
-  }, {
-    key: 'parseMessage',
-    value: function parseMessage(message) {
-      var splitStr = message.split(' ');
-      var command = splitStr[0];
-      var delay = splitStr[1];
-
-      switch (command) {
-        case '/hop':
-          return [command];
-        case '/delay':
-          if (String(Number(delay)) === delay) {
-            var messageBody = splitStr.slice(2).join(' ');
-
-            return [command + ' ' + delay, messageBody];
-          } else {
-            return ['', message];
-          }
-        default:
-          return ['', message];
-      }
     }
   }, {
     key: 'addUser',
@@ -133,38 +112,27 @@ var ChatRoom = function () {
     key: 'handleMessage',
     value: function handleMessage(e) {
       e.preventDefault();
+      var message = new _message2.default(this.retrieveMessage());
 
-      var _retrieveAndParseMess = this.retrieveAndParseMessage(),
-          _retrieveAndParseMess2 = _slicedToArray(_retrieveAndParseMess, 2),
-          command = _retrieveAndParseMess2[0],
-          message = _retrieveAndParseMess2[1];
-
-      if (command) {
-        this.execute(command, message);
-      } else if (message) {
-        this.sendMessage(message);
+      if (message.hasCommand()) {
+        this.execute(message);
+      } else if (!message.isEmpty()) {
+        this.sendMessage(message.body);
       }
     }
   }, {
     key: 'execute',
-    value: function execute(command, message) {
-      var _command$split = command.split(' '),
-          _command$split2 = _slicedToArray(_command$split, 2),
-          slashCommand = _command$split2[0],
-          delayTime = _command$split2[1];
-
-      if (slashCommand === '/delay' && message) {
-        this.sendDelayedMessage(message, delayTime);
-      } else if (slashCommand === '/delay') {
-        this.sendMessage(command);
-      } else if (slashCommand === '/hop') {
+    value: function execute(message) {
+      if (message.hasDelayCommand()) {
+        this.sendDelayedMessage(message.body, message.delayTime());
+      } else if (message.hasHopCommand()) {
         this.handleHop();
       }
     }
   }, {
     key: 'handleHop',
     value: function handleHop() {
-      this.addLogMessage('Find you a new pair...');
+      this.addLogMessage('Finding you a new pair...');
       this.clearInputField();
       this.socket.emit('hop');
     }
@@ -325,3 +293,5 @@ var ChatRoom = function () {
 }();
 
 ;
+
+exports.default = ChatRoom;

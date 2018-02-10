@@ -31,13 +31,12 @@ class ChatApp {
       if (!user.pairId) return;
       let pairId = user.pairId;
 
-      user.addException(pairId);
       user.pairId = null;
+      user.addException(pairId);
       this.findPair(user);
-
       user.broadcast('user left', {
         username: user.username
-      });
+      }, pairId);
     }
   }
 
