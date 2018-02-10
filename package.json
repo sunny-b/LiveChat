@@ -12,6 +12,7 @@
     "body-parser": "~1.15.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.2.0",
+    "eventemitter3": "^3.0.1",
     "express": "~4.13.4",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
@@ -19,9 +20,10 @@
     "socket.io": "^2.0.4"
   },
   "devDependencies": {
-    "jasmine": "^3.0.0",
     "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
     "babel-preset-env": "^1.6.1",
-    "babel-core": "^6.26.0"
+    "browserify": "^16.0.0",
+    "jasmine": "^3.0.0"
   }
 }
