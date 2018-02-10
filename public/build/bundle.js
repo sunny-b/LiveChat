@@ -6728,10 +6728,18 @@ var _wonderchat = require('./wonderchat');
 
 var _wonderchat2 = _interopRequireDefault(_wonderchat);
 
+var _view = require('./view');
+
+var _view2 = _interopRequireDefault(_view);
+
+var _socket = require('socket.io-client');
+
+var _socket2 = _interopRequireDefault(_socket);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-new _wonderchat2.default();
-},{"./wonderchat":52}],50:[function(require,module,exports){
+new _wonderchat2.default((0, _socket2.default)(), new _view2.default());
+},{"./view":51,"./wonderchat":52,"socket.io-client":33}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6944,6 +6952,7 @@ var ChatView = function (_EventEmitter) {
 
       this.lastTypingTime = new Date().getTime();
 
+      // detects if user has stopped typing and updates typing status
       setTimeout(function () {
         var typingTimer = new Date().getTime();
         var timeDiff = typingTimer - _this2.lastTypingTime;
@@ -6952,19 +6961,6 @@ var ChatView = function (_EventEmitter) {
           _this2.typing = false;
         }
       }, this.TYPING_TIMER_LENGTH);
-    }
-
-    // detects if user has stopped typing and updates typing status
-
-  }, {
-    key: 'typingTimeout',
-    value: function typingTimeout() {
-      var typingTimer = new Date().getTime();
-      var timeDiff = typingTimer - this.lastTypingTime;
-      if (timeDiff >= this.TYPING_TIMER_LENGTH && this.typing) {
-        this.emit('stop typing');
-        this.typing = false;
-      }
     }
 
     // toggles disabled status of message depending if input is empty
@@ -7130,26 +7126,18 @@ var _message = require('./message');
 
 var _message2 = _interopRequireDefault(_message);
 
-var _view = require('./view');
-
-var _view2 = _interopRequireDefault(_view);
-
-var _socket = require('socket.io-client');
-
-var _socket2 = _interopRequireDefault(_socket);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 // Main Application class that serves as controller between server and view
 var WonderChat = function () {
-  function WonderChat() {
+  function WonderChat(socket, view) {
     _classCallCheck(this, WonderChat);
 
     this.username = null;
-    this.socket = (0, _socket2.default)();
-    this.view = new _view2.default();
+    this.socket = socket;
+    this.view = view;
 
     this.attachSocketListeners();
     this.attachViewListeners();
@@ -7306,4 +7294,4 @@ var WonderChat = function () {
 ;
 
 exports.default = WonderChat;
-},{"./message":50,"./view":51,"socket.io-client":33}]},{},[49]);
+},{"./message":50}]},{},[49]);

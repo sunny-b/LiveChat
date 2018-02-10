@@ -1,13 +1,11 @@
 import ChatMessage from './message';
-import ChatView from './view';
-import io from 'socket.io-client';
 
 // Main Application class that serves as controller between server and view
 class WonderChat {
-  constructor() {
+  constructor(socket, view) {
     this.username = null;
-    this.socket = io();
-    this.view = new ChatView()
+    this.socket = socket;
+    this.view = view;
 
     this.attachSocketListeners();
     this.attachViewListeners();

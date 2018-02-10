@@ -104,6 +104,7 @@ var ChatView = function (_EventEmitter) {
 
       this.lastTypingTime = new Date().getTime();
 
+      // detects if user has stopped typing and updates typing status
       setTimeout(function () {
         var typingTimer = new Date().getTime();
         var timeDiff = typingTimer - _this2.lastTypingTime;
@@ -112,19 +113,6 @@ var ChatView = function (_EventEmitter) {
           _this2.typing = false;
         }
       }, this.TYPING_TIMER_LENGTH);
-    }
-
-    // detects if user has stopped typing and updates typing status
-
-  }, {
-    key: 'typingTimeout',
-    value: function typingTimeout() {
-      var typingTimer = new Date().getTime();
-      var timeDiff = typingTimer - this.lastTypingTime;
-      if (timeDiff >= this.TYPING_TIMER_LENGTH && this.typing) {
-        this.emit('stop typing');
-        this.typing = false;
-      }
     }
 
     // toggles disabled status of message depending if input is empty
