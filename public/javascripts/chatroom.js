@@ -132,7 +132,7 @@ class ChatRoom {
   }
 
   handleHop() {
-    this.addLogMessage('Find you a new pair...');
+    this.addLogMessage('Finding you a new pair...');
     this.clearInputField();
     this.socket.emit('hop');
   }
