@@ -6,7 +6,7 @@
 
 ## Description
 
-This is my submission for the take home challenge from Wonder. It is written in Node.JS and Express on the backend and ES6 vanilla Javascript on the front end. I used Socket.IO to establish connections between users so that they can chat.
+This is my submission for the a take home challenge. It is written in Node.JS and Express on the backend and ES6 vanilla Javascript on the front end. I used Socket.IO to establish connections between users so that they can chat.
 
 This chat application supports two slash commands:
 
