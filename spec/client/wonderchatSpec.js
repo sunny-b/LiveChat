@@ -1,17 +1,15 @@
 import WonderChat from '../../public/javascripts/wonderchat';
-import ChatMessage from '../../public/javascripts/message';
-import ChatView from '../../public/javascripts/view';
 
 describe('WonderChat', () => {
   const socket = {
-    on: (evt, fn) => {},
-    emit: (evt, data) => {}
+    on: () => {},
+    emit: () => {},
   };
   const view = {
-    on: (evt, fn) => {},
+    on: () => {},
     clearInputField: () => {},
     addLogMessage: () => {},
-    sameUserMessage: (message, username) => {}
+    sameUserMessage: () => {},
   };
   const chat = new WonderChat(socket, view);
 

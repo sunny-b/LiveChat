@@ -4,48 +4,48 @@ describe('Message', () => {
   describe('_parse', () => {
     const message = new Message('');
     it('returns empty command if no commands present', () => {
-      const [ command, messageBody ] = message._parse('test');
+      const [command] = message._parse('test');
       expect(command).toBe('');
     });
 
     it('returns empty message if empty string is passed in', () => {
-      const [ command, messageBody ] = message._parse('');
+      const [, messageBody] = message._parse('');
       expect(messageBody).toBe('');
     });
 
     it('returns message if there is a message present', () => {
-      let text = 'test';
-      const [ command, messageBody ] = message._parse(text);
+      const text = 'test';
+      const [, messageBody] = message._parse(text);
       expect(messageBody).toBe(text);
     });
 
     it('returns "/hop" for command if message contains "/hop" command', () => {
-      let text = '/hop';
-      const [ command, messageBody ] = message._parse(text);
+      const text = '/hop';
+      const [command] = message._parse(text);
       expect(command).toEqual(text);
     });
 
     it('returns "/delay {time}" for command if message contains "/delay {time} {message}"', () => {
-      let text = '/delay 1000 hi';
-      const [ command, messageBody ] = message._parse(text);
+      const text = '/delay 1000 hi';
+      const [command] = message._parse(text);
       expect(command).toEqual('/delay 1000');
     });
 
     it('returns "{message}" for message if message contains "/delay {time} {message}"', () => {
-      let text = '/delay 1000 hi';
-      const [ command, messageBody ] = message._parse(text);
+      const text = '/delay 1000 hi';
+      const [, messageBody] = message._parse(text);
       expect(messageBody).toEqual('hi');
     });
 
     it('returns "/delay {time}" for message if message is only "/delay {time}"', () => {
-      let text = '/delay 1000';
-      const [ command, messageBody ] = message._parse(text);
+      const text = '/delay 1000';
+      const [, messageBody] = message._parse(text);
       expect(messageBody).toEqual(text);
     });
 
     it('returns "" for command if message is only "/delay {time}"', () => {
-      let text = '/delay 1000';
-      const [ command, messageBody ] = message._parse(text);
+      const text = '/delay 1000';
+      const [command] = message._parse(text);
       expect(command).toEqual('');
     });
   });

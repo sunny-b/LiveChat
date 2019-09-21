@@ -2,11 +2,11 @@ import ChatView from '../../public/javascripts/view';
 
 describe('ChatView', () => {
   global.document = {
-    querySelector: (q) => ({
-      addEventListener: (type, fn) => {},
-      remoteEventListener: (type, fn) => {},
-    })
-  }
+    querySelector: () => ({
+      addEventListener: () => {},
+      remoteEventListener: () => {},
+    }),
+  };
 
   describe('constructor', () => {
     it('creates new instance of ChatView without error', () => {

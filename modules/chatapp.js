@@ -14,7 +14,7 @@ class ChatApp {
   // bind Socket.IO events to io connection
   attachIOEvents() {
     this.io.on('connection', (socket) => {
-      let user = new User(socket);
+      const user = new User(socket);
 
       socket.on('add user', this.addUser(user));
       socket.on('disconnect', this.dropUser(user));
@@ -29,22 +29,22 @@ class ChatApp {
   handleHop(user) {
     return () => {
       if (!user.pairId) return;
-      let pairId = user.pairId;
+      const { pairId } = user;
 
       user.pairId = null;
       user.addException(pairId);
       this.findPair(user);
       user.broadcast('user left', {
-        username: user.username
+        username: user.username,
       }, pairId);
-    }
+    };
   }
 
   findNewPairFor(user) {
     return () => {
       user.pairId = null;
       this.findPair(user);
-    }
+    };
   }
 
   addTyping(user) {
@@ -52,9 +52,9 @@ class ChatApp {
       if (!user.pairId) return;
 
       user.broadcast('typing', {
-        username: user.username
+        username: user.username,
       });
-    }
+    };
   }
 
   stopTyping(user) {
@@ -62,9 +62,9 @@ class ChatApp {
       if (!user.pairId) return;
 
       user.broadcast('stop typing', {
-        username: user.username
+        username: user.username,
       });
-    }
+    };
   }
 
   addMessage(user) {
@@ -73,9 +73,9 @@ class ChatApp {
       // send message to pair
       user.broadcast('new message', {
         username: user.username,
-        message: message
+        message,
       });
-    }
+    };
   }
 
   addUser(user) {
@@ -86,11 +86,11 @@ class ChatApp {
       user.added = true;
       user.emit('login');
       this.findPair(user);
-    }
+    };
   }
 
   findPair(user) {
-    let complement = this.waitlist.findComplement(user);
+    const complement = this.waitlist.findComplement(user);
 
     if (complement) {
       this.waitlist.remove(complement);
@@ -107,12 +107,12 @@ class ChatApp {
 
     userOne.broadcast('user joined', {
       username: userOne.username,
-      pairId: userOne.id
+      pairId: userOne.id,
     });
 
     userTwo.broadcast('user joined', {
       username: userTwo.username,
-      pairId: userTwo.id
+      pairId: userTwo.id,
     });
   }
 
@@ -121,10 +121,10 @@ class ChatApp {
       this.waitlist.remove(user);
       if (user.added && user.pairId) {
         user.broadcast('user left', {
-          username: user.username
+          username: user.username,
         });
       }
-    }
+    };
   }
 }
 

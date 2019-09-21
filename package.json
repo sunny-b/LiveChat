@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "lint": "./node_modules/.bin/eslint --ignore-path .gitignore .",
     "start": "node app.js",
     "test": "jasmine",
     "build": "npm run transpile && npm run modularize",
@@ -10,21 +11,27 @@
     "transpile": "babel public/javascripts -d public/build"
   },
   "dependencies": {
-    "body-parser": "~1.15.1",
+    "body-parser": "^1.19.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.2.0",
     "eventemitter3": "^3.0.1",
-    "express": "~4.13.4",
+    "express": "^4.17.1",
     "jade": "~1.11.0",
-    "morgan": "~1.7.0",
-    "serve-favicon": "~2.3.0",
-    "socket.io": "^2.0.4"
+    "morgan": "^1.9.1",
+    "serve-favicon": "^2.5.0",
+    "socket.io": "^2.0.4",
+    "socket.io-client": "^2.3.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "browserify": "^16.0.0",
+    "eslint": "^6.4.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-strongloop": "^2.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jasmine": "^2.10.1",
     "jasmine": "^3.0.0",
     "jsdom": "^11.6.2"
   }
