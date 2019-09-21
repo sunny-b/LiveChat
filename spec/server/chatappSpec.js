@@ -1,25 +1,24 @@
 const ChatApp = require('../../modules/chatapp');
 const WaitList = require('../../modules/waitlist');
-const User = require('../../modules/user');
 
 describe('ChatApp', () => {
   describe('initialization', () => {
     it('creates new instance of ChatApp without error', () => {
-      let io = {};
-      let chat = new ChatApp(io);
+      const io = {};
+      const chat = new ChatApp(io);
       expect(chat instanceof ChatApp).toBe(true);
     });
 
     it('assigns this.io to io object passed in', () => {
-      let io = {};
-      let chat = new ChatApp(io);
+      const io = {};
+      const chat = new ChatApp(io);
 
       expect(chat.io).toBe(io);
     });
 
     it('assigns this.waitlist to new instance of WaitList', () => {
-      let io = {};
-      let chat = new ChatApp(io);
+      const io = {};
+      const chat = new ChatApp(io);
 
       expect(chat.waitlist instanceof WaitList).toBe(true);
     });
@@ -27,10 +26,10 @@ describe('ChatApp', () => {
 
   describe('init', () => {
     it('calls attachIOEvents', () => {
-      let io = {
-        on: () => {}
-      }
-      let chat = new ChatApp(io);
+      const io = {
+        on: () => {},
+      };
+      const chat = new ChatApp(io);
       spyOn(chat, 'attachIOEvents');
       chat.init();
 
@@ -40,10 +39,10 @@ describe('ChatApp', () => {
 
   describe('attachIOEvents', () => {
     it('calls the on method of the io object', () => {
-      let io = {
-        on: () => {}
-      }
-      let chat = new ChatApp(io);
+      const io = {
+        on: () => {},
+      };
+      const chat = new ChatApp(io);
       spyOn(io, 'on');
       chat.attachIOEvents();
 
@@ -52,26 +51,26 @@ describe('ChatApp', () => {
   });
 
   describe('findPair', () => {
-    let io = {
-      on: () => {}
-    }
-    let chat = new ChatApp(io);
+    const io = {
+      on: () => {},
+    };
+    const chat = new ChatApp(io);
     const user1 = {
-      emit: (evt, data) => {},
-      broadcast: (evt, data) => {}
-    }
+      emit: () => {},
+      broadcast: () => {},
+    };
     const user2 = {
-      broadcast: (evt, data) => {}
+      broadcast: () => {},
     };
 
-    it("calls findComplement on waitlist with user passed in", () => {
+    it('calls findComplement on waitlist with user passed in', () => {
       spyOn(chat.waitlist, 'findComplement');
       chat.findPair(user1);
       expect(chat.waitlist.findComplement).toHaveBeenCalledWith(user1);
     });
 
     it("calls 'add' on waitlist if complement cannot be found", () => {
-      user1.canConnectTo = () => { return false };
+      user1.canConnectTo = () => false;
 
       spyOn(chat.waitlist, 'add');
       chat.findPair(user1);
@@ -81,7 +80,7 @@ describe('ChatApp', () => {
 
     it("calls 'emit' on user if complement cannot be found", () => {
       const evt = 'waiting';
-      user1.canConnectTo = () => { return false };
+      user1.canConnectTo = () => false;
 
       spyOn(user1, 'emit');
       chat.findPair(user1);
@@ -92,7 +91,7 @@ describe('ChatApp', () => {
     it("calls 'remove' on waitlist if complement can be found", () => {
       chat.waitlist.add(user2);
 
-      user1.canConnectTo = () => { return true };
+      user1.canConnectTo = () => true;
       spyOn(chat.waitlist, 'remove');
       chat.findPair(user1);
 
@@ -102,7 +101,7 @@ describe('ChatApp', () => {
     it("calls 'createPair' on chat if complement can be found", () => {
       chat.waitlist.add(user2);
 
-      user1.canConnectTo = () => { return true };
+      user1.canConnectTo = () => true;
       spyOn(chat, 'createPair');
       chat.findPair(user1);
 
@@ -115,19 +114,19 @@ describe('ChatApp', () => {
   });
 
   describe('createPair', () => {
-    let io = {
-      on: () => {}
-    }
-    let chat = new ChatApp(io);
+    const io = {
+      on: () => {},
+    };
+    const chat = new ChatApp(io);
     const user1 = {
       id: 1,
       username: 'test1',
-      broadcast: (evt, data) => {}
-    }
+      broadcast: () => {},
+    };
     const user2 = {
       id: 2,
       username: 'test2',
-      broadcast: (evt, data) => {}
+      broadcast: () => {},
     };
 
     it('assigns user1.id to user2.pairId', () => {
@@ -144,8 +143,8 @@ describe('ChatApp', () => {
       const evt = 'user joined';
       const data = {
         username: user1.username,
-        pairId: user1.id
-      }
+        pairId: user1.id,
+      };
 
       spyOn(user1, 'broadcast');
       chat.createPair(user1, user2);
@@ -156,8 +155,8 @@ describe('ChatApp', () => {
       const evt = 'user joined';
       const data = {
         username: user2.username,
-        pairId: user2.id
-      }
+        pairId: user2.id,
+      };
 
       spyOn(user2, 'broadcast');
       chat.createPair(user1, user2);
@@ -166,19 +165,19 @@ describe('ChatApp', () => {
   });
 
   describe('handleHop closure', () => {
-    let io = {
-      on: () => {}
-    }
-    let chat = new ChatApp(io);
+    const io = {
+      on: () => {},
+    };
+    const chat = new ChatApp(io);
     const user = {
       id: 1,
       pairId: 2,
-      addException: (id) => {},
+      addException: () => {},
       username: 'test1',
-      broadcast: (evt, data) => {},
-      emit: (evt, data) => {},
-      canConnectTo: () => { return false }
-    }
+      broadcast: () => {},
+      emit: () => {},
+      canConnectTo: () => false,
+    };
     const closure = chat.handleHop(user);
 
     it('returns a closure', () => {
@@ -186,7 +185,7 @@ describe('ChatApp', () => {
     });
 
     it('does not call addException if pairId is null', () => {
-      const pairId = user.pairId;
+      const { pairId } = user;
       user.pairId = null;
       spyOn(user, 'addException');
       closure();
@@ -195,7 +194,7 @@ describe('ChatApp', () => {
     });
 
     it('calls addException on user with pairId', () => {
-      const pairId = user.pairId;
+      const { pairId } = user;
       spyOn(user, 'addException');
       closure();
 
@@ -216,9 +215,9 @@ describe('ChatApp', () => {
     it('calls broadcast on user', () => {
       const evt = 'user left';
       const data = {
-        username: user.username
+        username: user.username,
       };
-      const pairId = user.pairId;
+      const { pairId } = user;
 
       spyOn(user, 'broadcast');
       closure();
@@ -232,19 +231,19 @@ describe('ChatApp', () => {
   });
 
   describe('findNewPairFor closure', () => {
-    let io = {
-      on: () => {}
-    }
-    let chat = new ChatApp(io);
+    const io = {
+      on: () => {},
+    };
+    const chat = new ChatApp(io);
     const user = {
       id: 1,
       pairId: 2,
-      addException: (id) => {},
+      addException: () => {},
       username: 'test1',
-      broadcast: (evt, data) => {},
-      emit: (evt, data) => {},
-      canConnectTo: () => { return false }
-    }
+      broadcast: () => {},
+      emit: () => {},
+      canConnectTo: () => false,
+    };
     const closure = chat.findNewPairFor(user);
 
     it('returns a closure', () => {
@@ -268,19 +267,19 @@ describe('ChatApp', () => {
   });
 
   describe('addTyping closure', () => {
-    let io = {
-      on: () => {}
-    }
-    let chat = new ChatApp(io);
+    const io = {
+      on: () => {},
+    };
+    const chat = new ChatApp(io);
     const user = {
       id: 1,
       pairId: 2,
-      addException: (id) => {},
+      addException: () => {},
       username: 'test1',
-      broadcast: (evt, data) => {},
-      emit: (evt, data) => {},
-      canConnectTo: () => { return false }
-    }
+      broadcast: () => {},
+      emit: () => {},
+      canConnectTo: () => false,
+    };
     const closure = chat.addTyping(user);
 
     it('returns a closure', () => {
@@ -290,7 +289,7 @@ describe('ChatApp', () => {
     it('does not call broadcast if pairId is null', () => {
       const evt = 'typing';
       const data = {
-        username: user.username
+        username: user.username,
       };
 
       user.pairId = null;
@@ -303,7 +302,7 @@ describe('ChatApp', () => {
     it('calls broadcast on user', () => {
       const evt = 'typing';
       const data = {
-        username: user.username
+        username: user.username,
       };
 
       spyOn(user, 'broadcast');
@@ -318,19 +317,19 @@ describe('ChatApp', () => {
   });
 
   describe('stopTyping closure', () => {
-    let io = {
-      on: () => {}
-    }
-    let chat = new ChatApp(io);
+    const io = {
+      on: () => {},
+    };
+    const chat = new ChatApp(io);
     const user = {
       id: 1,
       pairId: 2,
-      addException: (id) => {},
+      addException: () => {},
       username: 'test1',
-      broadcast: (evt, data) => {},
-      emit: (evt, data) => {},
-      canConnectTo: () => { return false }
-    }
+      broadcast: () => {},
+      emit: () => {},
+      canConnectTo: () => false,
+    };
     const closure = chat.stopTyping(user);
 
     it('returns a closure', () => {
@@ -340,7 +339,7 @@ describe('ChatApp', () => {
     it('does not call broadcast if pairId is null', () => {
       const evt = 'stop typing';
       const data = {
-        username: user.username
+        username: user.username,
       };
 
       user.pairId = null;
@@ -353,7 +352,7 @@ describe('ChatApp', () => {
     it('calls broadcast on user', () => {
       const evt = 'stop typing';
       const data = {
-        username: user.username
+        username: user.username,
       };
 
       spyOn(user, 'broadcast');
@@ -368,19 +367,19 @@ describe('ChatApp', () => {
   });
 
   describe('addMessage closure', () => {
-    let io = {
-      on: () => {}
-    }
-    let chat = new ChatApp(io);
+    const io = {
+      on: () => {},
+    };
+    const chat = new ChatApp(io);
     const user = {
       id: 1,
       pairId: 2,
-      addException: (id) => {},
+      addException: () => {},
       username: 'test1',
-      broadcast: (evt, data) => {},
-      emit: (evt, data) => {},
-      canConnectTo: () => { return false }
-    }
+      broadcast: () => {},
+      emit: () => {},
+      canConnectTo: () => false,
+    };
     const closure = chat.addMessage(user);
 
     it('returns a closure', () => {
@@ -391,7 +390,7 @@ describe('ChatApp', () => {
       const evt = 'new message';
       const data = {
         username: user.username,
-        message: 'test'
+        message: 'test',
       };
 
       user.pairId = null;
@@ -405,7 +404,7 @@ describe('ChatApp', () => {
       const evt = 'new message';
       const data = {
         username: user.username,
-        message: 'test'
+        message: 'test',
       };
 
       spyOn(user, 'broadcast');
@@ -420,19 +419,19 @@ describe('ChatApp', () => {
   });
 
   describe('addUser closure', () => {
-    let io = {
-      on: () => {}
-    }
-    let chat = new ChatApp(io);
+    const io = {
+      on: () => {},
+    };
+    const chat = new ChatApp(io);
     const user = {
       id: 1,
       pairId: 2,
       added: false,
-      addException: (id) => {},
-      broadcast: (evt, data) => {},
-      emit: (evt, data) => {},
-      canConnectTo: () => { return false }
-    }
+      addException: () => {},
+      broadcast: () => {},
+      emit: () => {},
+      canConnectTo: () => false,
+    };
     const closure = chat.addUser(user);
 
     it('returns a closure', () => {
@@ -483,20 +482,20 @@ describe('ChatApp', () => {
   });
 
   describe('dropUser closure', () => {
-    let io = {
-      on: () => {}
-    }
-    let chat = new ChatApp(io);
+    const io = {
+      on: () => {},
+    };
+    const chat = new ChatApp(io);
     const user = {
       id: 1,
       pairId: 2,
       username: 'test',
       added: true,
-      addException: (id) => {},
-      broadcast: (evt, data) => {},
-      emit: (evt, data) => {},
-      canConnectTo: () => { return false }
-    }
+      addException: () => {},
+      broadcast: () => {},
+      emit: () => {},
+      canConnectTo: () => false,
+    };
     const closure = chat.dropUser(user);
 
     it('returns a closure', () => {
@@ -506,7 +505,7 @@ describe('ChatApp', () => {
     it('does not call broadcast if added is false', () => {
       const evt = 'user left';
       const data = {
-        username: user.username
+        username: user.username,
       };
 
       user.added = false;
@@ -519,7 +518,7 @@ describe('ChatApp', () => {
     it('does not call broadcast if pairId is null', () => {
       const evt = 'user left';
       const data = {
-        username: user.username
+        username: user.username,
       };
       user.pairId = null;
       spyOn(user, 'broadcast');
@@ -531,7 +530,7 @@ describe('ChatApp', () => {
     it('calls broadcast if added true and pairId is not null', () => {
       const evt = 'user left';
       const data = {
-        username: user.username
+        username: user.username,
       };
 
       spyOn(user, 'broadcast');

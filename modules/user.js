@@ -13,8 +13,8 @@ class User {
   }
 
   canConnectTo(otherUser) {
-    return !this.exceptions.has(otherUser.id) &&
-           !otherUser.exceptions.has(this.socket.id);
+    return !this.exceptions.has(otherUser.id)
+           && !otherUser.exceptions.has(this.socket.id);
   }
 
   emit(evt, data) {

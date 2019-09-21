@@ -6,13 +6,13 @@ class ChatView extends EventEmitter {
     super();
     this.login = document.querySelector('.login');
     this.chat = document.querySelector('.chat');
-    this.messages = document.querySelector('.messages')
+    this.messages = document.querySelector('.messages');
     this.usernameInput = document.querySelector('.username-input');
     this.messageInput = document.querySelector('.message-input');
     this.messageForm = document.querySelector('.message-form');
     this.sendButton = document.querySelector('.send-button');
 
-    this.TYPING_TIMER_LENGTH = 400; //ms
+    this.TYPING_TIMER_LENGTH = 400; // ms
     this.typing = false;
 
     this.attachEventListeners();
@@ -55,7 +55,7 @@ class ChatView extends EventEmitter {
   }
 
   // update typing status of user and emit event if status changes
-  updateTyping(e) {
+  updateTyping() {
     if (!this.typing) {
       this.typing = true;
       this.emit('typing');
@@ -75,7 +75,7 @@ class ChatView extends EventEmitter {
   }
 
   // toggles disabled status of message depending if input is empty
-  toggleInput(e) {
+  toggleInput() {
     const message = this.retrieveMessage();
 
     if (message) {
@@ -89,14 +89,14 @@ class ChatView extends EventEmitter {
   handleMessage(e) {
     e.preventDefault();
     const message = this.retrieveMessage();
-    this.emit('new message', message)
+    this.emit('new message', message);
   }
 
   // clears message input and emits stop typing event.
   clearInputField() {
     this.typing = false;
     this.lastTypingTime = (new Date()).getTime();
-    this.messageInput.value = "";
+    this.messageInput.value = '';
     this.sendButton.disabled = true;
     this.emit('stop typing');
   }
@@ -112,9 +112,9 @@ class ChatView extends EventEmitter {
     this.clearInputField();
 
     this.addChatMessage({
-      message: message,
-      username: username,
-      isSameUser: true
+      message,
+      username,
+      isSameUser: true,
     });
   }
 
@@ -162,7 +162,7 @@ class ChatView extends EventEmitter {
 
   // Add a status log message to chat
   addLogMessage(message) {
-    let logEl = document.createElement('li')
+    const logEl = document.createElement('li');
     logEl.classList.add('log');
     logEl.innerText = message;
 
@@ -171,7 +171,7 @@ class ChatView extends EventEmitter {
 
   // Add 'User is typing...' message to chat
   addTypingMessage(data) {
-    data.message = 'is typing...'
+    data.message = 'is typing...';
     data.typing = true;
 
     this.addChatMessage(data);

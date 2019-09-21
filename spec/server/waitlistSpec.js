@@ -56,8 +56,8 @@ describe('WaitList', () => {
 
     it('does remove element if element is not in array', () => {
       const waitlist = new WaitList();
-      const user1 = {id: 1};
-      const user2 = {id: 2}
+      const user1 = { id: 1 };
+      const user2 = { id: 2 };
       waitlist.add(user1);
       expect(waitlist.list).toEqual([user1]);
 
@@ -72,7 +72,7 @@ describe('WaitList', () => {
 
     it('returns null if list is empty', () => {
       const user1 = {
-        canConnectTo: () => { return false; }
+        canConnectTo: () => false,
       };
 
       expect(waitlist.findComplement(user1)).toBe(null);
@@ -80,7 +80,7 @@ describe('WaitList', () => {
 
     it('returns null if cannot find complement', () => {
       const user1 = {
-        canConnectTo: () => { return false; }
+        canConnectTo: () => false,
       };
 
       waitlist.add(user);
@@ -89,7 +89,7 @@ describe('WaitList', () => {
 
     it('returns the user if can find complement', () => {
       const user1 = {
-        canConnectTo: () => { return true; }
+        canConnectTo: () => true,
       };
 
       waitlist.add(user);

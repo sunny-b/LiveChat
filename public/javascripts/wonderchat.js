@@ -13,8 +13,8 @@ class WonderChat {
 
   // Attach listeners to events emitted from view
   attachViewListeners() {
-    this.view.on('add user', username => this.handleAddUser(username));
-    this.view.on('new message', message => this.handleNewMessage(message));
+    this.view.on('add user', (username) => this.handleAddUser(username));
+    this.view.on('new message', (message) => this.handleNewMessage(message));
     this.view.on('typing', () => this.socket.emit('typing'));
     this.view.on('stop typing', () => this.socket.emit('stop typing'));
   }
@@ -85,14 +85,14 @@ class WonderChat {
     this.socket.on('user left', (data) => {
       this.view.removeTypingMessage();
       this.view.addLogMessage(`${data.username} has left.`);
-      this.socket.emit('find new pair')
+      this.socket.emit('find new pair');
     });
 
     this.socket.on('typing', (data) => {
       this.view.addTypingMessage(data);
     });
 
-    this.socket.on('stop typing', (data) => {
+    this.socket.on('stop typing', () => {
       this.view.removeTypingMessage();
     });
 
@@ -111,6 +111,6 @@ class WonderChat {
       this.view.addLogMessage('attempt to reconnect has failed');
     });
   }
-};
+}
 
 export default WonderChat;

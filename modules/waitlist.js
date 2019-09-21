@@ -8,13 +8,13 @@ class WaitList {
   }
 
   remove(user) {
-    let idx = this.list.indexOf(user);
+    const idx = this.list.indexOf(user);
     if (idx >= 0) this.list.splice(idx, 1);
   }
 
   findComplement(user) {
-    for (let i = 0; i < this.list.length; i++) {
-      let complement = this.list[i];
+    for (let i = 0; i < this.list.length; i += 1) {
+      const complement = this.list[i];
 
       if (user.canConnectTo(complement)) {
         return complement;

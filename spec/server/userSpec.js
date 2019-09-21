@@ -3,8 +3,8 @@ const User = require('../../modules/user');
 describe('User', () => {
   describe('constructor', () => {
     const socket = {
-      id: 1
-    }
+      id: 1,
+    };
     const user = new User(socket);
 
 
@@ -36,8 +36,8 @@ describe('User', () => {
 
   describe('addException', () => {
     const socket = {
-      id: 1
-    }
+      id: 1,
+    };
     const user = new User(socket);
 
     it('adds an id to exception set', () => {
@@ -49,8 +49,8 @@ describe('User', () => {
 
   describe('canConnectTo', () => {
     const socket = {
-      id: 1
-    }
+      id: 1,
+    };
     const user = new User(socket);
     const otherUser = { id: 2 };
 
@@ -67,7 +67,7 @@ describe('User', () => {
       expect(user.canConnectTo(otherUser)).toBe(false);
     });
 
-    it("returns true if neither user has the id in their exceptions", () => {
+    it('returns true if neither user has the id in their exceptions', () => {
       otherUser.exceptions = new Set([]);
 
       expect(user.canConnectTo(otherUser)).toBe(true);
@@ -81,8 +81,8 @@ describe('User', () => {
   describe('emit', () => {
     const socket = {
       id: 1,
-      emit: (evt, data) => {}
-    }
+      emit: () => {},
+    };
     const user = new User(socket);
 
     beforeEach(() => {
@@ -91,9 +91,9 @@ describe('User', () => {
 
     it('it calls "emit" method with the event and data passed in', () => {
       const evt = 'test';
-      const data = {}
+      const data = {};
 
-      user.emit(evt, data)
+      user.emit(evt, data);
       expect(user.socket.emit).toHaveBeenCalledWith(evt, data);
     });
   });

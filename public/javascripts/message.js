@@ -2,7 +2,7 @@
 class ChatMessage {
   // parses string into command and message body when initialized
   constructor(text) {
-    [ this.command, this.body ] = this._parse(text)
+    [this.command, this.body] = this._parse(text);
   }
 
   // check if slash command is present
@@ -35,26 +35,27 @@ class ChatMessage {
     const splitStr = message.split(' ');
     const command = splitStr[0];
     const delay = splitStr[1];
+    let messageBody = '';
 
-    switch(command) {
+    switch (command) {
       case '/hop':
         return [command, ''];
       case '/delay':
-        let messageBody = splitStr.slice(2).join(' ');
+        messageBody = splitStr.slice(2).join(' ');
 
         if (this._validDelayCommand(delay, messageBody)) {
           return [`${command} ${delay}`, messageBody];
-        } else {
-          return ['', message];
         }
+        return ['', message];
+
       default:
-        return [ '', message];
+        return ['', message];
     }
   }
 
   // check if delay command has valid delay time and message afterwards
   _validDelayCommand(delay, messageBody) {
-    return String(parseInt(delay)) === delay && !!messageBody;
+    return String(parseInt(delay, 10)) === delay && !!messageBody;
   }
 }
 
