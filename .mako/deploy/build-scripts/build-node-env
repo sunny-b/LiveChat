@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# Install nodejs and environment
+#
+# Steps:
+#   - Prepare env
+#   - Detect dependencies
+#   - Install packages
+#   - Setup nodejs
+#   - yarn install
+#   - Cleanup cruft
+
+set -e
+
+# ------------------------------------ Prepare env
+
+
+# ------------------------------------ Detect Dependencies
+
+# set the base packages
+deps=()
+build_deps=(build-base git python)
+
+# todo: comb through this list and determine which packages are needed
+#       only for build and move to build_deps
+# mysql
+if [[ `grep 'mysql' package.json` ]]; then
+  deps+=(mariadb-connector-c)
+  build_deps+=(mariadb-connector-c-dev)
+fi
+# memcache
+if [[ `grep 'memcache' package.json` ]]; then
+  deps+=(libmemcached)
+  build_deps+=(libmemcached-dev)
+fi
+# postgres
+if [[ `grep 'postgres' package.json` ]]; then
+  deps+=(libpq)
+  build_deps+=(postgresql-dev)
+fi
+# redis
+if [[ `grep 'redis\|spade\|rebridge' package.json` ]]; then
+  deps+=(redis)
+fi
+
+# ------------------------------------ Install Packages
+
+# install the final packages
+if [[ ${#deps[@]} -gt 0 ]]; then
+  apk add --no-cache ${deps[@]}
+fi
+
+# install the build packages
+if [[ ${#build_deps[@]} -gt 0 ]]; then
+  apk add --no-cache --virtual build-deps ${build_deps[@]}
+fi
+
+# ------------------------------------ Setup nodejs
+
+
+# ------------------------------------ yarn install
+
+# install from the package.json
+if [[ -f /app/yarn.lock ]]; then
+  yarn install
+else
+  npm install
+fi
+
+# ------------------------------------ Cleanup
+
+# rollback build dependencies
+apk del build-deps
