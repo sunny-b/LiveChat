@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# This script will run right after the load balancer
+# starts routing to this container
+
+# Custom
+#
+# Add anything custom that needs to be run
+
+SCRIPTS=$(node -- <<END
+  var scripts = require('./package.json').scripts;
+  if (scripts != null) {
+    Object.keys(scripts).forEach(function(script) {
+      process.stdout.write(script+' ');
+    });
+  }
+END
+)
