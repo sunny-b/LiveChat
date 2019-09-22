@@ -1,0 +1,19 @@
+resources:
+  - name: source_code
+    type: git
+    source:
+      uri: https://github.com/sunny-b/WonderChat.git
+      branch: master
+
+  # - name: image
+  #   type: docker-image
+  #   source:
+  #     repository: sunlib/wonderchat
+
+jobs:
+  - name: test
+    plan:
+      - get: source_code
+        trigger: true
+      - task: test
+        file: ci/tasks/test.yml
