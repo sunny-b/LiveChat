@@ -47,10 +47,8 @@ jobs:
         trigger: true
       - get: dependency-cache
         passed: [test]
-      - task: build-bin
-        file: source_code/ci/tasks/build.yml
       - put: image
         params:
-          build: source_code/deploy
+          build: source_code
           tag: source_code/.git/HEAD
           tag_as_latest: true
