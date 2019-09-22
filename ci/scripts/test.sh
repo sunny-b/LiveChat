@@ -4,9 +4,9 @@ set -e -u -x
 
 echo "Running tests"
 
-mv dependency-cache/node_modules wonderchat
+mv dependency-cache/node_modules source_code
 
-cd wonderchat
+cd source_code
 
 npm test
 
