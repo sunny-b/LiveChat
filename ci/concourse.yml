@@ -15,5 +15,5 @@ jobs:
     plan:
       - get: source_code
         trigger: true
-      - task: test
-        file: WonderChat/ci/tasks/test.yml
+      - task: test-and-lint
+        file: source_code/ci/tasks/test.yml
