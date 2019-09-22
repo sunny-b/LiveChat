@@ -11,4 +11,4 @@ inputs:
 - name: source_code
 
 run:
-  path: ci/scripts/test.sh
+  path: wonderchat/ci/scripts/test.sh
