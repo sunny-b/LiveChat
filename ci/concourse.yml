@@ -1,19 +1,42 @@
+resource_types:
+  - name: npm-cache
+    type: docker-image
+    source:
+      repository: ymedlop/npm-cache-resource
+      tag: latest
+
 resources:
   - name: source_code
     type: git
-    source:
+    source: &repo-source
       uri: https://github.com/sunny-b/WonderChat.git
       branch: master
+  - name: dependency-cache
+    type: npm-cache
+    source:
+      <<: *repo-source
+      paths:
+        - package.json
 
   # - name: image
   #   type: docker-image
   #   source:
   #     repository: sunlib/wonderchat
 
+
+
 jobs:
+  - name: install
+    plan:
+      - get: source_code
+        trigger: true
+      - get: dependency-cache
   - name: test
     plan:
       - get: source_code
         trigger: true
+        passed: [install]
+      - get: dependency-cache
+        passed: [install]
       - task: test-and-lint
         file: source_code/ci/tasks/test.yml
