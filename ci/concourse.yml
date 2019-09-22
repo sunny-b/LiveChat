@@ -18,10 +18,10 @@ resources:
       paths:
         - package.json
 
-  # - name: image
-  #   type: docker-image
-  #   source:
-  #     repository: sunlib/wonderchat
+  - name: image
+    type: docker-image
+    source:
+      repository: sunlib/wonderchat
 
 
 
@@ -40,3 +40,17 @@ jobs:
         passed: [install]
       - task: test
         file: source_code/ci/tasks/test.yml
+  - name: update-image
+    plan:
+      - get: source_code
+        passed: [test]
+        trigger: true
+      - get: dependency-cache
+        passed: [test]
+      - task: build-bin
+        file: source_code/ci/tasks/build.yml
+      - put: image
+        params:
+          build: build
+          tag: source_code/.git/HEAD
+          tag_as_latest: true

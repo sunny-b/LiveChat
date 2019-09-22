@@ -1,0 +1,53 @@
+# Creates a docker image with node, and your app
+#
+# Steps:
+#   - Set meta information
+#   - Install packages and scripts
+#   - Copy package.json package-lock.json from app
+#   - Build node env
+#   - Copy all source code
+#   - Build node app
+
+# start from a minimal, bare-bones image
+FROM node:10-alpine
+
+# set the working directory to /app
+WORKDIR /app
+
+# install base packages
+RUN apk add --no-cache bash
+
+# copy the build scripts into image
+COPY .mako/deploy/build-scripts /usr/local/sbin/
+
+# ensure they're executable
+RUN chmod +x /usr/local/sbin/*
+
+# copy the start script into image
+COPY .mako/deploy/bin /usr/local/bin/
+
+# ensure they're executable
+RUN chmod +x /usr/local/bin/*
+
+# copy hooks
+COPY .mako/deploy/hooks /opt/mako/hooks
+
+# ensure they're executable
+RUN chmod +x /opt/mako/hooks/*
+
+# add node_modules/.bin to path
+ENV PATH="/app/node_modules/.bin:${PATH}"
+
+# copy package.json package-lock.json yarn.lock into image
+COPY package*.json yarn.* /app/
+
+# build node (see build-scripts)
+RUN build-node-env
+
+# copy the source code
+COPY . .
+
+# build app (see build-scripts)
+RUN build-node-app
+
+RUN start-node
