@@ -9,6 +9,7 @@ image_resource:
 
 inputs:
 - name: source_code
+- name: dependency-cache
 
 run:
   path: source_code/ci/scripts/test.sh
