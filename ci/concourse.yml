@@ -51,6 +51,6 @@ jobs:
         file: source_code/ci/tasks/build.yml
       - put: image
         params:
-          build: build
+          build: source_code/deploy
           tag: source_code/.git/HEAD
           tag_as_latest: true

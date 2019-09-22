@@ -18,28 +18,22 @@ WORKDIR /app
 RUN apk add --no-cache bash
 
 # copy the build scripts into image
-COPY .mako/deploy/build-scripts /usr/local/sbin/
+COPY deploy/build-scripts /usr/local/sbin/
 
 # ensure they're executable
 RUN chmod +x /usr/local/sbin/*
 
 # copy the start script into image
-COPY .mako/deploy/bin /usr/local/bin/
+COPY deploy/bin /usr/local/bin/
 
 # ensure they're executable
 RUN chmod +x /usr/local/bin/*
-
-# copy hooks
-COPY .mako/deploy/hooks /opt/mako/hooks
-
-# ensure they're executable
-RUN chmod +x /opt/mako/hooks/*
 
 # add node_modules/.bin to path
 ENV PATH="/app/node_modules/.bin:${PATH}"
 
 # copy package.json package-lock.json yarn.lock into image
-COPY package*.json yarn.* /app/
+COPY package*.json /app/
 
 # build node (see build-scripts)
 RUN build-node-env
