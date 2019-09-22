@@ -38,5 +38,5 @@ jobs:
         passed: [install]
       - get: dependency-cache
         passed: [install]
-      - task: test-and-lint
+      - task: test
         file: source_code/ci/tasks/test.yml
