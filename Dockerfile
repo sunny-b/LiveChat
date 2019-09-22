@@ -43,5 +43,3 @@ COPY . .
 
 # build app (see build-scripts)
 RUN build-node-app
-
-RUN start-node
