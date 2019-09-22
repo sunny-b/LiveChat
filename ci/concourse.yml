@@ -16,4 +16,4 @@ jobs:
       - get: source_code
         trigger: true
       - task: test
-        file: ci/tasks/test.yml
+        file: wonderchat/ci/tasks/test.yml
