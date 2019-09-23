@@ -22,6 +22,8 @@ resources:
     type: docker-image
     source:
       repository: sunlib/wonderchat
+      username: sunlib
+      password: {{password}}
 
 
 
