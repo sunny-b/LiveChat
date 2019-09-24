@@ -11,13 +11,13 @@ resources:
     source: &repo-source
       uri: https://github.com/sunny-b/WonderChat.git
       branch: master
+      git_crypt_key: {{git_crypt_key}}
   - name: dependency-cache
     type: npm-cache
     source:
       <<: *repo-source
       paths:
         - package.json
-
   - name: image
     type: docker-image
     source:
@@ -26,13 +26,13 @@ resources:
       password: {{password}}
 
 
-
 jobs:
   - name: install
     plan:
       - get: source_code
         trigger: true
       - get: dependency-cache
+
   - name: test
     plan:
       - get: source_code
@@ -42,6 +42,7 @@ jobs:
         passed: [install]
       - task: test
         file: source_code/ci/tasks/test.yml
+
   - name: update-image
     plan:
       - get: source_code
@@ -54,3 +55,26 @@ jobs:
           build: source_code
           tag: source_code/.git/HEAD
           tag_as_latest: true
+
+  - name: deploy-staging
+    plan:
+      - get: source_code
+        passed: [update-image]
+        trigger: true
+      - task: deploy
+        file: source_code/ci/tasks/deploy.yml
+        params:
+          SSH_USER: {{stage_ssh_user}}
+          SSH_IP: 159.65.182.235
+          SSH_KEY_PATH: source_code/ci/ssh.key
+
+  - name: deploy-production
+    plan:
+      - get: source_code
+        passed: [deploy-staging]
+      - task: deploy
+        file: source_code/ci/tasks/deploy.yml
+        params:
+          SSH_USER: {{prod_ssh_user}}
+          SSH_IP: 159.65.182.235
+          SSH_KEY_PATH: source_code/ci/ssh.key
