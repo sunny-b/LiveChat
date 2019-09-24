@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e -u -x
-
 echo "Deploying app"
 
 DOCKER_HOST="ssh://$SSH_USER@$SSH_IP"

@@ -60,6 +60,7 @@ jobs:
     plan:
       - get: source_code
         passed: [update-image]
+        trigger: true
       - task: deploy
         file: source_code/ci/tasks/deploy.yml
         params:
@@ -71,7 +72,6 @@ jobs:
     plan:
       - get: source_code
         passed: [deploy-staging]
-        trigger: true
       - task: deploy
         file: source_code/ci/tasks/deploy.yml
         params:
