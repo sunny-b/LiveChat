@@ -1,5 +1,5 @@
 const express = require('express');
-const auth = require('express-basic-auth')
+const auth = require('express-basic-auth');
 const path = require('path');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
