@@ -6,6 +6,8 @@ echo "Deploying app"
 
 eval $(ssh-agent)
 
+chmod 600 "$SSH_KEY_PATH"
+
 ssh-add "$SSH_KEY_PATH"
 
 ssh -o "StrictHostKeyChecking no" "$SSH_USER@$SSH_IP" docker pull sunlib/wonderchat:latest
