@@ -1,4 +1,5 @@
 const express = require('express');
+const auth = require('express-basic-auth')
 const path = require('path');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
@@ -26,6 +27,19 @@ app.use('/node_modules', express.static(path.join(__dirname, '/node_modules')));
 
 // Initialize Socket
 chat.init();
+
+if (app.get('env') === 'staging') {
+  const user = process.env.AUTH_USER;
+  const pass = process.env.AUTH_PASS;
+  const users = {};
+
+  users[user] = pass;
+
+  app.use(auth({
+    users,
+    challenge: true,
+  }));
+}
 
 // GET '/'
 app.get('/', (req, res) => {

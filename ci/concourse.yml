@@ -67,6 +67,10 @@ jobs:
           SSH_USER: {{stage_ssh_user}}
           SSH_IP: 10.132.223.189
           SSH_KEY_PATH: source_code/ci/ssh.key
+          NODE_ENV: staging
+          AUTH_USER: {{basic_auth_user}}
+          AUTH_PASS: {{basic_auth_pass}}
+
 
   - name: deploy-production
     plan:
@@ -78,3 +82,4 @@ jobs:
           SSH_USER: {{prod_ssh_user}}
           SSH_IP: 10.132.245.101
           SSH_KEY_PATH: source_code/ci/ssh.key
+          NODE_ENV: production

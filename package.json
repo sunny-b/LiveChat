@@ -16,6 +16,7 @@
     "debug": "~2.2.0",
     "eventemitter3": "^3.0.1",
     "express": "^4.17.1",
+    "express-basic-auth": "^1.2.0",
     "jade": "~1.11.0",
     "morgan": "^1.9.1",
     "serve-favicon": "^2.5.0",
