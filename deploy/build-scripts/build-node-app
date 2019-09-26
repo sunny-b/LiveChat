@@ -18,6 +18,6 @@ if [[ " $SCRIPTS " =~ " build " ]]; then
   if [[ -f /app/yarn.lock ]]; then
     yarn build
   else
-    npm build
+    npm run build
   fi
 fi
