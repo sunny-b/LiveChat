@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e -u -x
+
 echo "Deploying app"
 
 eval $(ssh-agent)
