@@ -65,7 +65,7 @@ jobs:
         file: source_code/ci/tasks/deploy.yml
         params:
           SSH_USER: {{stage_ssh_user}}
-          SSH_IP: 159.65.182.235
+          SSH_IP: 10.132.223.189
           SSH_KEY_PATH: source_code/ci/ssh.key
 
   - name: deploy-production
@@ -76,5 +76,5 @@ jobs:
         file: source_code/ci/tasks/deploy.yml
         params:
           SSH_USER: {{prod_ssh_user}}
-          SSH_IP: 159.65.182.235
+          SSH_IP: 10.132.245.101
           SSH_KEY_PATH: source_code/ci/ssh.key
