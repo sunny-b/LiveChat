@@ -1,6 +1,6 @@
-# Wonder Chat
+# Live Chat
 
-![WonderChat demo](/public/images/wonderchat.gif)
+![LiveChat demo](/public/images/wonderchat.gif)
 
 [View the production application here](https://wonderful-chat.herokuapp.com/)
 
